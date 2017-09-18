@@ -4,7 +4,8 @@ Build a Docker image based on Oracle Linux containing Oracle Unified Directory.
 
 ## Content
 
- tbd
+This is still work in progress....
+
 
 ## Installation
 
