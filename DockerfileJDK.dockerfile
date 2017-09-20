@@ -19,7 +19,7 @@
 # - add oud or base env
 # -----------------------------------------------------------------------------
 #
-FROM oracle/serverjre:8
+FROM oraclelinux:7-slim
 
 MAINTAINER Stefan Oehrli <stefan.oehrli@trivadis.com>
 
@@ -28,12 +28,16 @@ ARG ORACLE_BASE=/u00/app/oracle
 ARG ORACLE_HOME_NAME=oud12.2.1.3.0
 
 # Environment variables required for this build (do NOT change)
-ENV OUD_PKG=fmw_*_oud.jar
+ENV JAVA_PKG=jdk-8u*-linux-x64.tar.gz \
+    OUD_PKG=fmw_*_oud.jar
 
 # Use second ENV so that variable get substituted
 ENV ORACLE_HOME=$ORACLE_BASE/product/$ORACLE_HOME_NAME \
     OUD_RSP=$ORACLE_BASE/etc/install_oud.rsp \
     OUI_LOC=$ORACLE_BASE/etc/oraInst.loc 
+
+# copy and unpack java package
+ADD $JAVA_PKG $ORACLE_BASE/product
 
 # update base linux, install package and create oud user
 RUN yum -y upgrade && \
@@ -45,7 +49,6 @@ RUN yum -y upgrade && \
     useradd -g oud oud && \
 
 # set ownership to user oud
-    mkdir -p $ORACLE_BASE && \
     chown -R oud:oud $ORACLE_BASE
 
 # run as oud user as of now
@@ -55,7 +58,7 @@ USER oud
 COPY $OUD_PKG $ORACLE_BASE/install/
 
 # just check a few things
-RUN export JAVA_DIR=$(ls -1 -d /usr/java/*) && \
+RUN export JAVA_HOME=$(ls -d $ORACLE_BASE/product/jdk*) && \
     mkdir -p $ORACLE_BASE/etc $ORACLE_BASE/local && \
 
 # create an oraInst.loc file
