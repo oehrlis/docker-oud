@@ -1,0 +1,10 @@
+# Download the Server JRE (which includes necessary JDK bits for backend Java based solutions)
+#
+# The following link is a My Oracle Support (http://support.oracle.com) wget download link. You 
+# require a valid MOS Account to download Oracle Software from MOS.
+# Patch Download URL: https://updates.oracle.com/ARULink/PatchDetails/process_form?patch_num=26512979
+# Direct Download   : https://updates.oracle.com/Orion/Services/download/p26512979_180144_Linux-x86-64.zip?aru=21443434&patch_file=p26512979_180144_Linux-x86-64.zip
+#
+# SHA-256                                                        File
+# -------------------------------------------------------------- ---------------------------------
+90bf854832f29b955ef3256510af689c89a50ffc082cf972e7498cbb24237547 p26512979_180144_Linux-x86-64.zip

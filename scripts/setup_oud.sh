@@ -20,6 +20,10 @@
 # TODO parametize MOS credentials
 # ----------------------------------------------------------------------
 
+# get the MOS Credentials
+MOS_USER="${1#*=}"
+MOS_PASSWORD="${2#*=}"
+
 # Download and Package Variables
 # JAVA 1.8u144
 export JAVA_URL="https://updates.oracle.com/Orion/Services/download/p26512979_180144_Linux-x86-64.zip?aru=21443434&patch_file=p26512979_180144_Linux-x86-64.zip"
@@ -38,6 +42,24 @@ export JAVA_DIR=/usr/java           # java home location
 export DOWNLOAD=/tmp/download       # temporary download directory
 mkdir -p $DOWNLOAD
 chmod 777 $DOWNLOAD
+
+# create a .netrc if it does not exists
+if [[ ! -z "$MOS_USER" ]]
+then
+    if [[ ! -z "$MOS_PASSWORD" ]]
+    then
+        echo "machine login.oracle.com login $MOS_USER password $MOS_PASSWORD" >/opt/docker/bin/.netrc
+    else
+        echo "MOS_PASSWORD is empty"
+    fi
+elif [ ! -e /opt/docker/bin/.netrc ]
+then
+    >&2 echo "================================================================================="
+    >&2 echo "MOS_USER nor .netrc definend. Download from MOS will fail. "
+    >&2 echo "Make sure to copy $JAVA_PKG and "
+    >&2 echo "$FMW_OUD_PKG to software."
+    >&2 echo "================================================================================="
+fi
 
 echo "--- Setup Oracle OFA environment -----------------------------------------------"
 echo "--- Create groups for Oracle software"
@@ -60,13 +82,8 @@ echo "--- Create OFA directory structure"
 mkdir -p $ORACLE_ROOT
 mkdir -p $ORACLE_DATA
 mkdir -p $ORACLE_BASE
-mkdir -p $ORACLE_BASE/admin         # softlink to volume
-mkdir -p $ORACLE_BASE/audit         # softlink to volume
-mkdir -p $ORACLE_BASE/cfgtoollogs
-mkdir -p $ORACLE_BASE/diag          # softlink to volume
-mkdir -p $ORACLE_BASE/etc           # softlink to volume
+mkdir -p $ORACLE_BASE/etc
 mkdir -p $ORACLE_BASE/local
-mkdir -p $ORACLE_BASE/network       # softlink to volume
 mkdir -p $ORACLE_BASE/product
 
 echo "--- Create response and inventory loc files"
@@ -92,9 +109,13 @@ yum upgrade -y
 # install basic packages util-linux, libaio 
 yum install -y libaio util-linux hostname which unzip zip tar sudo
 
+# add oracle to the sudoers
+echo "oracle  ALL=(ALL)   NOPASSWD: ALL" >>/etc/sudoers
+
 # Download Server JRE 8u144 package if it does not exist /tmp/download
 if [ ! -e $DOWNLOAD/$JAVA_PKG ]
 then
+    
     echo "--- Download Server JRE 8u144 from MOS -----------------------------------------"
     curl --netrc-file /opt/docker/bin/.netrc --cookie-jar cookie-jar.txt \
     --location-trusted $JAVA_URL -o $DOWNLOAD/$JAVA_PKG
