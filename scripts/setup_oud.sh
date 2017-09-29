@@ -117,7 +117,7 @@ if [ ! -e $DOWNLOAD/$JAVA_PKG ]
 then
     
     echo "--- Download Server JRE 8u144 from MOS -----------------------------------------"
-    curl --netrc-file /opt/docker/bin/.netrc --cookie-jar cookie-jar.txt \
+    curl --netrc-file /opt/docker/bin/.netrc --cookie-jar $DOWNLOAD/cookie-jar.txt \
     --location-trusted $JAVA_URL -o $DOWNLOAD/$JAVA_PKG
 else
     echo "--- Use local copy of $DOWNLOAD/$JAVA_PKG --------------------------------------"
@@ -147,7 +147,7 @@ alternatives --install /usr/bin/jar jar $JAVA_DIR/bin/jar 20000
 if [ ! -e $DOWNLOAD/$FMW_OUD_PKG ]
 then
     echo "--- Download Oracle Unified Directory 12.2.1.3.0 from OTN ----------------------"
-    curl --netrc-file /opt/docker/bin/.netrc --cookie-jar cookie-jar.txt \
+    curl --netrc-file /opt/docker/bin/.netrc --cookie-jar $DOWNLOAD/cookie-jar.txt \
     --location-trusted $FMW_OUD_URL -o $DOWNLOAD/$FMW_OUD_PKG
 else
     echo "--- Use local copy of $DOWNLOAD/$FMW_OUD_PKG ----------------"
