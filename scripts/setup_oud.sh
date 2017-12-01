@@ -25,14 +25,18 @@ MOS_USER="${1#*=}"
 MOS_PASSWORD="${2#*=}"
 
 # Download and Package Variables
-# JAVA 1.8u144
-export JAVA_URL="https://updates.oracle.com/Orion/Services/download/p26512979_180144_Linux-x86-64.zip?aru=21443434&patch_file=p26512979_180144_Linux-x86-64.zip"
-export JAVA_PKG="p26512979_180144_Linux-x86-64.zip"
+# OUD BASE
+OUDBASE_URL="https://github.com/oehrlis/oudbase/raw/master/build/oudbase_install.sh"
+OUDBASE_PKG="oudbase_install.sh"
+
+# JAVA 1.8u152 https://updates.oracle.com/ARULink/PatchDetails/process_form?patch_num=2659589
+export JAVA_URL="https://updates.oracle.com/Orion/Services/download/p26595894_180152_Linux-x86-64.zip?aru=21611278&patch_file=p26595894_180152_Linux-x86-64.zip"
+export JAVA_PKG="p26595894_180152_Linux-x86-64.zip"
 
 # Oracle Unified Directory 12.2.1.3
-export FMW_OUD_URL="https://updates.oracle.com/Orion/Services/download/p26270957_122130_Generic.zip?aru=21504981&patch_file=p26270957_122130_Generic.zip"
-export FMW_OUD_PKG="p26270957_122130_Generic.zip"
-export FMW_OUD_JAR=fmw_12.2.1.3.0_oud.jar
+FMW_OUD_URL="https://updates.oracle.com/Orion/Services/download/p26270957_122130_Generic.zip?aru=21504981&patch_file=p26270957_122130_Generic.zip"
+FMW_OUD_PKG="p26270957_122130_Generic.zip"
+FMW_OUD_JAR=fmw_12.2.1.3.0_oud.jar
 
 # define environment variables
 export ORACLE_ROOT=/u00             # oracle root directory
@@ -82,21 +86,9 @@ echo "--- Create OFA directory structure"
 mkdir -p $ORACLE_ROOT
 mkdir -p $ORACLE_DATA
 mkdir -p $ORACLE_BASE
-mkdir -p $ORACLE_BASE/etc
+mkdir -p $ORACLE_DATA/etc
 mkdir -p $ORACLE_BASE/local
 mkdir -p $ORACLE_BASE/product
-
-echo "--- Create response and inventory loc files"
-# create an oraInst.loc file
-echo "inventory_loc=$ORACLE_BASE/oraInventory" > $ORACLE_BASE/etc/oraInst.loc
-echo "inst_group=oinstall" >> $ORACLE_BASE/etc/oraInst.loc
-
-# create a generic response file for OUD/WLS
-echo "[ENGINE]" > $ORACLE_BASE/etc/install.rsp
-echo "Response File Version=1.0.0.0.0" >> $ORACLE_BASE/etc/install.rsp
-echo "[GENERIC]" >> $ORACLE_BASE/etc/install.rsp
-echo "DECLINE_SECURITY_UPDATES=true" $ORACLE_BASE/etc/install.rsp
-echo "SECURITY_UPDATES_VIA_MYORACLESUPPORT=false" >> $ORACLE_BASE/etc/install.rsp
 
 # change permissions and ownership
 chmod a+xr $ORACLE_ROOT $ORACLE_DATA
@@ -112,18 +104,57 @@ yum install -y libaio procps-ng util-linux hostname which unzip zip tar sudo
 # add oracle to the sudoers
 echo "oracle  ALL=(ALL)   NOPASSWD: ALL" >>/etc/sudoers
 
-# Download Server JRE 8u144 package if it does not exist /tmp/download
+# OUD Base package if it does not exist /tmp/download
+if [ ! -e $DOWNLOAD/$OUDBASE_PKG ]
+then
+    echo "--- Download OUD Base package from github --------------------------------------"
+    curl --cookie-jar $DOWNLOAD/cookie-jar.txt \
+    --location-trusted $OUDBASE_URL -o $DOWNLOAD/$OUDBASE_PKG
+else
+    echo "--- Use local copy of $DOWNLOAD/$OUDBASE_PKG -----------------------------------"
+fi
+
+echo "--- Install OUD Base scripts ---------------------------------------------------"
+# Install OUD Base scripts
+chmod 755 $DOWNLOAD/$OUDBASE_PKG
+sudo -u oracle $DOWNLOAD/$OUDBASE_PKG -v -a -b /u00/app/oracle -d $ORACLE_DATA
+
+echo "--- Create response and inventory loc files"
+# set the response_file and inventory loc file
+export RESPONSE_FILE="$ORACLE_BASE/local/etc/install.rsp"
+export INS_LOC_FILE="$ORACLE_BASE/local/etc/oraInst.loc"
+
+# check the response file
+if [ ! -f "$RESPONSE_FILE" ]; then
+    echo "WARN can not find respone file ($RESPONSE_FILE)"
+    echo "WARN create a new file"
+    echo "[ENGINE]" > $RESPONSE_FILE
+    echo "Response File Version=1.0.0.0.0" >> $RESPONSE_FILE
+    echo "[GENERIC]" >> $RESPONSE_FILE
+    echo "DECLINE_SECURITY_UPDATES=true" >> $RESPONSE_FILE
+    echo "SECURITY_UPDATES_VIA_MYORACLESUPPORT=false" >> $RESPONSE_FILE
+fi
+
+# check the install loc file
+if [ ! -f "$INS_LOC_FILE" ]; then
+    echo "WARN can not find installation loc file ($INS_LOC_FILE)"
+    echo "WARN create a new file"
+    echo "inventory_loc=$ORACLE_BASE/oraInventory" > $INS_LOC_FILE
+    echo "inst_group=oinstall" >> $INS_LOC_FILE
+fi
+
+# Download Server JRE 8u152 package if it does not exist /tmp/download
 if [ ! -e $DOWNLOAD/$JAVA_PKG ]
 then
     
-    echo "--- Download Server JRE 8u144 from MOS -----------------------------------------"
+    echo "--- Download Server JRE 8u152 from MOS -----------------------------------------"
     curl --netrc-file /opt/docker/bin/.netrc --cookie-jar $DOWNLOAD/cookie-jar.txt \
     --location-trusted $JAVA_URL -o $DOWNLOAD/$JAVA_PKG
 else
     echo "--- Use local copy of $DOWNLOAD/$JAVA_PKG --------------------------------------"
 fi
 
-echo "--- Install Server JRE 8u144 ---------------------------------------------------"
+echo "--- Install Server JRE 8u152 ---------------------------------------------------"
 # create java default folder
 mkdir -p $JAVA_DIR
 
@@ -160,8 +191,8 @@ cd -
 
 # Install OUD in silent mode
 sudo -u oracle java -jar $DOWNLOAD/$FMW_OUD_JAR -silent \
-    -responseFile $ORACLE_BASE/etc/install.rsp \
-    -invPtrLoc $ORACLE_BASE/etc/oraInst.loc \
+    -responseFile "$RESPONSE_FILE" \
+    -invPtrLoc "$INS_LOC_FILE" \
     -ignoreSysPrereqs -force \
     -novalidation ORACLE_HOME=$ORACLE_BASE/product/fmw12.2.1.3.0 \
     INSTALL_TYPE="Standalone Oracle Unified Directory Server (Managed independently of WebLogic server)"

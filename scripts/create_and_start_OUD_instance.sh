@@ -3,7 +3,7 @@
 # Trivadis AG, Infrastructure Managed Services
 # Saegereistrasse 29, 8152 Glattbrugg, Switzerland
 # ---------------------------------------------------------------------------
-# Name.......: createAndStartOUDSMDomain.sh 
+# Name.......: create_and_start_OUD_instance.sh 
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
 # Editor.....: 
 # Date.......: 
@@ -46,6 +46,10 @@ trap term_wls SIGTERM
 # Set SIGKILL handler
 trap kill_wls SIGKILL
 
+
+echo "not yet implemnted"
+exit
+
 # check if AdminServer.log does exists
 ADD_DOMAIN=1
 if [ ! -f ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log ]; then
@@ -78,7 +82,7 @@ if [ $ADD_DOMAIN -eq 0 ]; then
     sed -i -e "s|ADMIN_PASSWORD|$s|g" /opt/docker/bin/create_OUDSM.py
 
     # Create an empty domain
-    su - oracle -c "/u00/app/oracle/product/fmw12.2.1.3.0/oracle_common/common/bin/wlst.sh -skipWLSModuleScanning /opt/docker/bin/create_OUDSM.py"
+    su - oracle -m -c "/u00/app/oracle/product/fmw12.2.1.3.0/oracle_common/common/bin/wlst.sh -skipWLSModuleScanning /opt/docker/bin/create_OUDSM.py"
     su - oracle -c "${DOMAIN_HOME}/bin/setDomainEnv.sh" 
 fi
 

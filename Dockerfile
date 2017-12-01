@@ -31,6 +31,17 @@ MAINTAINER Stefan Oehrli <stefan.oehrli@trivadis.com>
 ARG MOS_USER
 ARG MOS_PASSWORD
 
+# environment variables (defaults for wlst and create_and_start_OUD_instance)
+ENV INSTANCE_NAME="${DOMAIN_NAME:-oud_docker}" \
+    LDAP_PORT="${LDAP_PORT:-1389}" \
+    LDAPS_PORT="${LDAPS_PORT:-1636}" \
+    ADMIN_PORT="${ADMIN_PORT:-4444}" \
+    REPL_PORT="${REPL_PORT:-8989}" \
+    ADMIN_USER="${ADMIN_USER:-weblogic}" \
+    ADMIN_PASSWORD="${ADMIN_PASSWORD:-""}"
+    
+# OUD_INSTANCE_BASE=/u01/domains/"${OUD_INSTANCE_BASE:-oud_docker}" \
+
 # copy all scripts to DOCKER_BIN
 ADD scripts /opt/docker/bin/
 ADD software /tmp/download
@@ -43,3 +54,7 @@ EXPOSE 1389 1636 4444 8989
 
 # Oracle data volume for OUD instance and configuration files
 VOLUME ["/u01"]
+
+# entrypoint for OUD instance creation, startup and graceful shutdown
+ENTRYPOINT ["/opt/docker/bin/create_and_start_OUD_instance.sh"]
+CMD [""]
