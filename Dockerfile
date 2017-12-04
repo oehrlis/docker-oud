@@ -43,13 +43,18 @@ ENV DOWNLOAD=/tmp/download \
     ORACLE_DATA=${ORACLE_DATA:-/u01} \
     ORACLE_BASE=${ORACLE_BASE:-/u00/app/oracle} \
     ORACLE_HOME_NAME=fmw12.2.1.3.0 \
-    
-    DOMAIN_NAME=${DOMAIN_NAME:-oudsm_domain} \
-    DOMAIN_HOME=/u01/domains/${DOMAIN_NAME:-oudsm_domain} \
-    ADMIN_PORT=${ADMIN_PORT:-7001} \
-    ADMIN_SSLPORT=${ADMIN_SSLPORT:-7002} \
-    ADMIN_USER=${ADMIN_USER:-weblogic} \
-    ADMIN_PASSWORD=${ADMIN_PASSWORD:-""}
+    OUD_INSTANCE=${OUD_INSTANCE:-oud_docker} \
+    OUD_INSTANCE_BASE=${OUD_INSTANCE_BASE:-/u01/instances} \
+    OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE} \
+    LDAP_PORT=${LDAP_PORT:-1389} \
+    LDAPS_PORT=${LDAPS_PORT:-1636} \
+    REP_PORT=${REP_PORT:-8989} \
+    ADMIN_PORT=${ADMIN_PORT:-4444} \
+    ADMIN_USER=${ADMIN_USER:-'Directory Manager'} \
+    ADMIN_PASSWORD=${ADMIN_PASSWORD:-""} \
+    BASEDN=${BASEDN:-'dc=postgasse,dc=org'} \
+    SAMPLE_DATA=${SAMPLE_DATA:-TRUE} \
+    OUD_PROXY=${OUD_PROXY:-FALSE}
 
 # copy all scripts to DOCKER_BIN
 COPY scripts ${DOCKER_SCRIPTS}
@@ -57,7 +62,7 @@ COPY software ${DOWNLOAD}
 
 # Java and OUD base environment setup via shell script to reduce layers and 
 # optimize final disk usage
-RUN ${DOCKER_SCRIPTS}/setup_java.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD} \
+RUN ${DOCKER_SCRIPTS}/setup_java.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD} && \
     ${DOCKER_SCRIPTS}/setup_oudbase.sh
 
 # Switch to user oracle, oracle software as to be installed with regular user
@@ -67,12 +72,12 @@ USER oracle
 RUN ${DOCKER_SCRIPTS}/setup_oud.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD}
 
 # OUD admin and ldap ports as well the OUDSM console
-EXPOSE ${ADMIN_PORT} ${ADMIN_SSLPORT}
+EXPOSE ${LDAP_PORT} ${LDAPS_PORT} ${ADMIN_PORT} ${REP_PORT}
 
 # Oracle data volume for OUD instance and configuration files
 VOLUME ["${ORACLE_DATA}"]
 
 # entrypoint for OUDSM domain creation, startup and graceful shutdown
-#ENTRYPOINT ["${DOCKER_SCRIPTS}/create_and_start_OUD_Instance.sh"]
+ENTRYPOINT ["/opt/docker/bin/create_and_start_OUD_Instance.sh"]
 CMD [""]
 # --- EOF --------------------------------------------------------------

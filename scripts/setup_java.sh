@@ -54,7 +54,7 @@ echo "--- Upgrade OS and install additional Packages ---------------------------
 yum upgrade -y
 
 # install basic packages util-linux, libaio 
-yum install -y unzip gzip tar
+yum install -y unzip gzip tar hostname which procps-ng
 
 # Download Server JRE 8u144 package if it does not exist /tmp/download
 if [ ! -e ${DOWNLOAD}/${JAVA_PKG} ]

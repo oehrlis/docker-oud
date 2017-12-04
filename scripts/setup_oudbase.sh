@@ -45,20 +45,13 @@ useradd --create-home --gid oinstall --shell /bin/bash \
 
 echo "--- Create OFA directory structure"
 # create oracle directories
-mkdir -p ${ORACLE_ROOT}
+mkdir -v -p ${ORACLE_ROOT}
 
 # create base directories
-mkdir -p ${ORACLE_BASE}
-mkdir -p ${ORACLE_BASE}/local
-mkdir -p ${ORACLE_BASE}/product
-
-# create instance and domain directories
-mkdir -p ${ORACLE_DATA}
-mkdir -p ${ORACLE_DATA}/backup
-mkdir -p ${ORACLE_DATA}/domains
-mkdir -p ${ORACLE_DATA}/etc
-mkdir -p ${ORACLE_DATA}/instances
-mkdir -p ${ORACLE_DATA}/log
+mkdir -v -p ${ORACLE_BASE}
+mkdir -v -p ${ORACLE_BASE}/local
+mkdir -v -p ${ORACLE_BASE}/product
+mkdir -v -p ${ORACLE_DATA}
 
 echo "--- Setup OUD base environment -------------------------------------------------"
 # OUD Base package if it does not exist /tmp/download
@@ -119,7 +112,8 @@ fi
 
 echo "--- Adjust permissions and remove temporary files ------------------------------"
 # adjust user and group permissions
-chmod a+xr ${ORACLE_ROOT} ${ORACLE_DATA} ${DOCKER_SCRIPTS}
+mv /root/.OUD_BASE /home/oracle/.OUD_BASE
+chmod a+xr ${ORACLE_ROOT} ${ORACLE_DATA} ${DOCKER_SCRIPTS} /home/oracle/.OUD_BASE
 chown oracle:oinstall -R ${ORACLE_BASE} ${ORACLE_DATA} ${DOCKER_SCRIPTS}
 
 # clean up
