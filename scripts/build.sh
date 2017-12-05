@@ -17,6 +17,6 @@
 # see git revision history for more information on changes/updates
 # TODO.......:
 # -----------------------------------------------------------------------------
-DOCKERFILE="$(dirname $0)/../Dockerfile"
+DOCKERFILE="$(dirname $0)/../Dockerfile.oud"
 DOCKERDIR="$(dirname $0)/.."
 docker build -t oehrlis/oud -f "${DOCKERFILE}" "${DOCKERDIR}"

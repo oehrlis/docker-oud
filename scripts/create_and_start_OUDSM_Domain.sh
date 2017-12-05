@@ -3,7 +3,7 @@
 # Trivadis AG, Infrastructure Managed Services
 # Saegereistrasse 29, 8152 Glattbrugg, Switzerland
 # ---------------------------------------------------------------------------
-# Name.......: create_and_start_OUD_Domain.sh 
+# Name.......: create_and_start_OUDSM_Domain.sh 
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
@@ -23,17 +23,17 @@
 # ---------------------------------------------------------------------------
 # SIGTERM handler
 # ---------------------------------------------------------------------------
-function term_oud() {
+function term_wls() {
     echo "---------------------------------------------------------------"
     echo "SIGTERM received, shutting down the server!"
     echo "---------------------------------------------------------------"
-    ${INSTANCE_HOME}/OUD/bin/stop-ds
+    ${DOMAIN_HOME}/bin/stopWebLogic.sh
 }
 
 # ---------------------------------------------------------------------------
 # SIGKILL handler
 # ---------------------------------------------------------------------------
-function kill_oud() {
+function kill_wls() {
     echo "---------------------------------------------------------------"
     echo "SIGKILL received, shutting down the server!"
     echo "---------------------------------------------------------------"
@@ -41,20 +41,19 @@ kill -9 $childPID
 }
 
 # Set SIGTERM handler
-trap term_oud SIGTERM
+trap term_wls SIGTERM
 
 # Set SIGKILL handler
-trap kill_oud SIGKILL
+trap kill_wls SIGKILL
 
 # check if AdminServer.log does exists
 ADD_DOMAIN=1
-if [ ! -f ${INSTANCE_HOME}/OUD/config/config.ldif ]; then
+if [ ! -f ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log ]; then
     ADD_DOMAIN=0
 fi
 
 # Create Domain only if 1st execution
 if [ ${ADD_DOMAIN} -eq 0 ]; then
-echo "--- Setup OUD environment on volume --------------------------------------------"
     # create instance and domain directories on volume
     mkdir -v -p ${ORACLE_DATA}
     mkdir -v -p ${ORACLE_DATA}/backup
@@ -76,8 +75,7 @@ echo "--- Setup OUD environment on volume --------------------------------------
 
     # copy default config files
     cp ${ORACLE_BASE}/local/etc/*.conf ${ORACLE_DATA}/etc
-    
-    # generate a password
+
     if [ -z ${ADMIN_PASSWORD} ]; then
         # Auto generate Oracle WebLogic Server admin password
         while true; do
@@ -89,60 +87,38 @@ echo "--- Setup OUD environment on volume --------------------------------------
             fi
         done
         echo "---------------------------------------------------------------"
-        echo "    Oracle Unified Directory Server auto generated instance"
-        echo "    admin password :"
-        echo "    ----> Directory Admin : cn=${ADMIN_USER} "
-        echo "    ----> Admin password  : $s"
+        echo "    Oracle WebLogic Server Auto Generated OUDSM Domain:"
+        echo "    ----> 'weblogic' admin password: $s"
         echo "---------------------------------------------------------------"
     else
         s=${ADMIN_PASSWORD}
         echo "---------------------------------------------------------------"
-        echo "    Oracle Unified Directory Server auto generated instance"
-        echo "    admin password :"
-        echo "    ----> Directory Admin : cn=${ADMIN_USER} "
-        echo "    ----> Admin password  : $s"
+        echo "    Oracle WebLogic Server Auto Generated OUDSM Domain:"
+        echo "    ----> 'weblogic' admin password: $s"
         echo "---------------------------------------------------------------"
-    fi
+    fi 
+    sed -i -e "s|ADMIN_PASSWORD|$s|g" ${DOCKER_SCRIPTS}/create_OUDSM.py
 
-    # write password file
-    echo "$s" > ${ORACLE_DATA}/etc/${OUD_INSTANCE}_pwd.txt
+    echo "--- Create OUDSM domain --------------------------------------------------------"
 
-    echo "--- Create OUD instance --------------------------------------------------------"
-    echo "  OUD_INSTANCE=${OUD_INSTANCE}"
-    echo "  OUD_INSTANCE_BASE=${OUD_INSTANCE_BASE}"
-    echo "  OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE}"
-    echo "  LDAP_PORT=${LDAP_PORT}"
-    echo "  LDAPS_PORT=${LDAPS_PORT}"
-    echo "  REP_PORT=${REP_PORT}"
+    echo "  DOMAIN_NAME=${DOMAIN_NAME}"
+    echo "  DOMAIN_HOME=${DOMAIN_HOME}"
     echo "  ADMIN_PORT=${ADMIN_PORT}"
+    echo "  ADMIN_SSLPORT=${ADMIN_SSLPORT}"
     echo "  ADMIN_USER=${ADMIN_USER}"
-    echo "  BASEDN=${BASEDN}"
-    # Create an directory
-    ${ORACLE_BASE}/product/fmw12.2.1.3.0/oud/oud-setup \
-        --cli \
-        --instancePath ${OUD_INSTANCE_HOME}/OUD \
-        --adminConnectorPort ${ADMIN_PORT} \
-        --rootUserDN "cn=${ADMIN_USER}" \
-        --rootUserPasswordFile ${ORACLE_DATA}/etc/${OUD_INSTANCE}_pwd.txt \
-        --ldapPort ${LDAP_PORT} \
-        --ldapsPort ${LDAPS_PORT} \
-        --generateSelfSignedCertificate \
-        --hostname $(hostname) \
-        --baseDN ${BASEDN} \
-        --addBaseEntry \
-        --serverTuning jvm-default \
-        --offlineToolsTuning autotune \
-        --no-prompt \
-        --noPropertiesFile
+
+    # Create an empty domain
+    ${ORACLE_BASE}/product/fmw12.2.1.3.0/oracle_common/common/bin/wlst.sh -skipWLSModuleScanning ${DOCKER_SCRIPTS}/create_OUDSM.py
+    ${DOMAIN_HOME}/bin/setDomainEnv.sh
 fi
 
 # Start Admin Server and tail the logs
 echo "---------------------------------------------------------------"
-echo "    Start Oracle WebLogic Server OUD Instance:"
+echo "    Start Oracle WebLogic Server OUDSM Domain:"
 echo "---------------------------------------------------------------"
-${OUD_INSTANCE_HOME}/OUD/bin/start-ds
-touch ${OUD_INSTANCE_HOME}/OUD/logs/server.out
-tail -f ${OUD_INSTANCE_HOME}/OUD/logs/server.out &
+${DOMAIN_HOME}/startWebLogic.sh
+touch ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log
+tail -f ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log &
 
 childPID=$!
 wait $childPID

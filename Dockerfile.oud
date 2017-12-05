@@ -45,7 +45,6 @@ ENV DOWNLOAD=/tmp/download \
     ORACLE_HOME_NAME=fmw12.2.1.3.0 \
     OUD_INSTANCE=${OUD_INSTANCE:-oud_docker} \
     OUD_INSTANCE_BASE=${OUD_INSTANCE_BASE:-/u01/instances} \
-    OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE} \
     LDAP_PORT=${LDAP_PORT:-1389} \
     LDAPS_PORT=${LDAPS_PORT:-1636} \
     REP_PORT=${REP_PORT:-8989} \
@@ -56,6 +55,9 @@ ENV DOWNLOAD=/tmp/download \
     SAMPLE_DATA=${SAMPLE_DATA:-TRUE} \
     OUD_PROXY=${OUD_PROXY:-FALSE}
 
+# Use second ENV so that variable get substituted
+ENV OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE}
+    
 # copy all scripts to DOCKER_BIN
 COPY scripts ${DOCKER_SCRIPTS}
 COPY software ${DOWNLOAD}
@@ -78,6 +80,6 @@ EXPOSE ${LDAP_PORT} ${LDAPS_PORT} ${ADMIN_PORT} ${REP_PORT}
 VOLUME ["${ORACLE_DATA}"]
 
 # entrypoint for OUDSM domain creation, startup and graceful shutdown
-ENTRYPOINT ["/opt/docker/bin/create_and_start_OUD_Instance.sh"]
-CMD [""]
+#ENTRYPOINT ["/opt/docker/bin/create_and_start_OUD_Instance.sh"]
+CMD ["/opt/docker/bin/create_and_start_OUD_Instance.sh"]
 # --- EOF --------------------------------------------------------------

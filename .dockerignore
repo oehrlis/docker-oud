@@ -1,2 +1,3 @@
 **/*.gitignore
 scripts/build.sh
+scripts/buildDockerImage.*
