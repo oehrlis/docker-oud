@@ -53,12 +53,15 @@ ENV DOWNLOAD=/tmp/download \
     ADMIN_PASSWORD=${ADMIN_PASSWORD:-""} \
     BASEDN=${BASEDN:-'dc=postgasse,dc=org'} \
     SAMPLE_DATA=${SAMPLE_DATA:-TRUE} \
-    OUD_PROXY=${OUD_PROXY:-FALSE}
+    OUD_PROXY=${OUD_PROXY:-FALSE} \
+    CREATE_INSTANCE=${CREATE_INSTANCE:-TRUE}
 
 # Use second ENV so that variable get substituted
-ENV OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE}
-    
-# copy all scripts to DOCKER_BIN
+ENV OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE} \
+    OUD_INSTANCE_INIT=${OUD_INSTANCE_INIT:-$ORACLE_DATA/etc/$OUD_INSTANCE} \
+    PATH=${PATH}:"${OUD_INSTANCE_BASE}/${OUD_INSTANCE}/OUD/bin":"${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/bin"
+
+# copy all setup scripts to DOCKER_BIN
 COPY scripts ${DOCKER_SCRIPTS}
 COPY software ${DOWNLOAD}
 
@@ -76,10 +79,13 @@ RUN ${DOCKER_SCRIPTS}/setup_oud.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSW
 # OUD admin and ldap ports as well the OUDSM console
 EXPOSE ${LDAP_PORT} ${LDAPS_PORT} ${ADMIN_PORT} ${REP_PORT}
 
+# run container health check
+HEALTHCHECK --interval=1m --start-period=5m \
+   CMD "${ORACLE_BASE}/local/bin/check_OUD_Instance.sh" >/dev/null || exit 1
+
 # Oracle data volume for OUD instance and configuration files
 VOLUME ["${ORACLE_DATA}"]
 
-# entrypoint for OUDSM domain creation, startup and graceful shutdown
-#ENTRYPOINT ["/opt/docker/bin/create_and_start_OUD_Instance.sh"]
-CMD ["/opt/docker/bin/create_and_start_OUD_Instance.sh"]
+# Define default command to start OUD instance
+CMD ["/opt/docker/bin/start_OUD_Instance.sh"]
 # --- EOF --------------------------------------------------------------
