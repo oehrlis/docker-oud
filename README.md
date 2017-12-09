@@ -1,6 +1,7 @@
 # Oracle Unified Directory on Docker
-Docker image for a collocated Unified Directory 12.2.1.3 setup with Oracle
-Fusion Middleware Infrastructure 12.2.1.3
+Docker image for a standalone Unified Directory 12.2.1.3 or a collocated 
+Unified Directory 12.2.1.3 setup with Oracle Fusion Middleware Infrastructure 
+12.2.1.3
 
 **CURRENTLY NOT UPTODATE with the latest commit**
 
@@ -11,21 +12,18 @@ with the following Linux packages and configuration:
 
 * Upgrade of all installed packages to the latest release (yum upgrade)
 * Install the following additional packages including there dependencies:
-     
     * *hostname* Utility to set/show the host name or domain name
     * *which* Displays where a particular program in your path is located
     * *unzip* A utility for unpacking zip files
-    * *zip* A file compression and packaging utility compatible with PKZIP
     * *tar* A GNU file archiving program
     * *gzip* A file compression and packaging utility compatible with PKZIP
-    * *procps-ng* A file compression and packaging utility compatible with PKZIP
+    * *procps-ng* System and process monitoring utilities
 * Dedicated groups for user *oracle*, oinstall (gid 1000), osdba (gid 1010),
 osoper (gid 1020), osbackupdba (gid 1030), oskmdba (gid 1040), osdgdba (gid 1050)
 * Operating system user *oracle* (uid 1000)
 * [OUD Base](https://github.com/oehrlis/oudbase) environment developed by [ORAdba](www.oradba.ch)
 * Create of Oracle OFA Directories see below
 * Install Oracle Server JRE 8 update 152
-
 * Install Oracle Fusion Middleware Infrastructure 12c (12.2.1.3)
 * Install Oracle Unified Directory 12c (12.2.1.3) collocated with Oracle Fusion Middleware
 
@@ -58,7 +56,7 @@ JAVA_DIR             | ```/usr/java```             | Base directory for java hom
 JAVA_HOME            | ```$JAVA_DIR/jdk1.8.0_152```| Java home directory
 
 ## Installation and Build
-The docker image has to be build manually based on [oehrlis/docker-oudsm](https://github.com/oehrlis/docker-oudsm) from GitHub. Due to license restrictions from Oracle I can not provide this image on a public Docker repository (see [OTN Developer License Terms](http://www.oracle.com/technetwork/licenses/standard-license-152015.html)). The required Software has to be downloaded prior image build. Alternatively it is possible to specify MOS credentials in ```scripts/.netrc``` or via build arguments.
+The docker image has to be build manually based on [oehrlis/docker-oud](https://github.com/oehrlis/docker-oudsm) from GitHub. Due to license restrictions from Oracle I can not provide this image on a public Docker repository (see [OTN Developer License Terms](http://www.oracle.com/technetwork/licenses/standard-license-152015.html)). The required Software has to be downloaded prior image build. Alternatively it is possible to specify MOS credentials in ```scripts/.netrc``` or via build arguments.
 
 ### Obtaining Product Distributions
 The Oracle Software required to setup an Oracle Unified Directory docker image is basically not public available. It is subject to Oracle's license terms. For this reason a valid license is required (eg. [OTN Developer License Terms](http://www.oracle.com/technetwork/licenses/standard-license-152015.html)). In addition, Oracle's license terms and conditions must be accepted before downloading.
@@ -141,10 +139,10 @@ If you need to find the passwords at a later time, grep for "password" in the Do
 ## Issues
 Please file your bug reports, enhancement requests, questions and other support requests within [Github's issue tracker](https://help.github.com/articles/about-issues/):
 
-* [Existing issues](https://github.com/oehrlis/docker-oudsm/issues)
-* [submit new issue](https://github.com/oehrlis/docker-oudsm/issues/new)
+* [Existing issues](https://github.com/oehrlis/docker-oud/issues)
+* [submit new issue](https://github.com/oehrlis/docker-oud/issues/new)
 
 ## License
-docker-oudsm is licensed under the Apache License, Version 2.0. You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>.
+docker-oud is licensed under the Apache License, Version 2.0. You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>.
 
 To download and run Oracle Unifified Directory, regardless whether inside or outside a Docker container, you must download the binaries from the Oracle website and accept the license indicated at that page. See [OTN Developer License Terms](http://www.oracle.com/technetwork/licenses/standard-license-152015.html) and [Oracle Database Licensing Information User Manual](https://docs.oracle.com/database/122/DBLIC/Licensing-Information.htm#DBLIC-GUID-B6113390-9586-46D7-9008-DCC9EDA45AB4)

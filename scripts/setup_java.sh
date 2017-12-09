@@ -8,7 +8,7 @@
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
-# Purpose....: Setup script for docker base image 
+# Purpose....: Setup script for Java installation to build docker OUD image 
 # Notes......: Requires MOS credentials in .netrc
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0

@@ -8,7 +8,7 @@
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
-# Purpose....: Setup script to setup oracle environment
+# Purpose....: Setup script for oracle environment to build docker OUD image 
 # Notes......: OUD Base scripts are downloaded from github
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0
@@ -111,8 +111,9 @@ if [ ! -f "${INS_LOC_FILE}" ]; then
 fi
 
 echo "--- Adjust permissions and remove temporary files ------------------------------"
+# make sure that oracle and root has a OUD_BASE
+cp /root/.OUD_BASE /home/oracle/.OUD_BASE
 # adjust user and group permissions
-mv /root/.OUD_BASE /home/oracle/.OUD_BASE
 chmod a+xr ${ORACLE_ROOT} ${ORACLE_DATA} ${DOCKER_SCRIPTS} /home/oracle/.OUD_BASE
 chown oracle:oinstall -R ${ORACLE_BASE} ${ORACLE_DATA} ${DOCKER_SCRIPTS}
 

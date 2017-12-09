@@ -3,12 +3,12 @@
 # Trivadis AG, Infrastructure Managed Services
 # Saegereistrasse 29, 8152 Glattbrugg, Switzerland
 # ----------------------------------------------------------------------
-# Name.......: setup_oud.sh 
+# Name.......: setup_oudsm.sh 
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
-# Purpose....: Setup script for docker base image 
+# Purpose....: Setup script for OUDSM installation to build docker OUDSM image 
 # Notes......: Requires MOS credentials in .netrc
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0
@@ -99,7 +99,7 @@ java -jar ${DOWNLOAD}/$FMW_OUD_JAR -silent \
     -novalidation ORACLE_HOME=${ORACLE_BASE}/product/${ORACLE_HOME_NAME} \
     INSTALL_TYPE="Collocated Oracle Unified Directory Server (Managed through WebLogic server)"
 
-# clean up
+# clean up and remove temporary files
 echo "--- Clean up yum cache and temporary download files ----------------------------"
 rm -rf ${DOWNLOAD}/*
 rm -rf ${DOCKER_SCRIPTS}/.netrc

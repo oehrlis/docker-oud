@@ -3,25 +3,24 @@
 # Trivadis AG, Infrastructure Managed Services
 # Saegereistrasse 29, 8152 Glattbrugg, Switzerland
 # ---------------------------------------------------------------------------
-# Name.......: create_and_start_OUD_instance.sh 
+# Name.......: create_OUDSM_Domain.sh 
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
 # Purpose....: Build script for docker image 
-# Notes......: Script does look for the config.ldif. If it does not exist
+# Notes......: Script does look for the AdminServer.log. If it does not exist
 #              it assume that the container is started the first time. A new
-#              OUD instance will be created. If CREATE_INSTANCE is set to false
-#              no instance will be created.
+#              OUDSM domain will be created.
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0
 # ---------------------------------------------------------------------------
-# Modified...: 
+# Modified...:
 # see git revision history for more information on changes/updates
 # TODO.......:
 # ---------------------------------------------------------------------------
-echo "--- Setup OUD environment on volume ${ORACLE_DATA} --------------------"
 
+echo "--- Setup OUDSM environment on volume ${ORACLE_DATA} --------------------"
 # create instance and domain directories on volume
 mkdir -v -p ${ORACLE_DATA}
 mkdir -v -p ${ORACLE_DATA}/backup
@@ -39,12 +38,11 @@ echo "#  3 : OUD LDAPS Port"                            >>${OUDTAB}
 echo "#  4 : OUD Admin Port"                            >>${OUDTAB}
 echo "#  5 : OUD Replication Port"                      >>${OUDTAB}
 echo "#---------------------------------------------"   >>${OUDTAB}
-echo "${OUD_INSTANCE}:${LDAP_PORT}:${LDAPS_PORT}:${ADMIN_PORT}:${REP_PORT}" >>${OUDTAB}
+echo "${INSTANCE_NAME}:${LDAP_PORT}:${LDAP_PORT}:${ADMIN_PORT}:${REP_PORT}" >>${OUDTAB}
 
 # copy default config files
 cp ${ORACLE_BASE}/local/etc/*.conf ${ORACLE_DATA}/etc
 
-# generate a password
 if [ -z ${ADMIN_PASSWORD} ]; then
     # Auto generate Oracle WebLogic Server admin password
     while true; do
@@ -56,59 +54,31 @@ if [ -z ${ADMIN_PASSWORD} ]; then
         fi
     done
     echo "---------------------------------------------------------------"
-    echo "    Oracle Unified Directory Server auto generated instance"
-    echo "    admin password :"
-    echo "    ----> Directory Admin : ${ADMIN_USER} "
-    echo "    ----> Admin password  : $s"
+    echo "    Oracle WebLogic Server Auto Generated OUDSM Domain:"
+    echo "    ----> 'weblogic' admin password: $s"
     echo "---------------------------------------------------------------"
 else
     s=${ADMIN_PASSWORD}
     echo "---------------------------------------------------------------"
-    echo "    Oracle Unified Directory Server auto generated instance"
-    echo "    admin password :"
-    echo "    ----> Directory Admin : ${ADMIN_USER} "
-    echo "    ----> Admin password  : $s"
+    echo "    Oracle WebLogic Server Auto Generated OUDSM Domain:"
+    echo "    ----> 'weblogic' admin password: $s"
     echo "---------------------------------------------------------------"
-fi
+fi 
+sed -i -e "s|ADMIN_PASSWORD|$s|g" ${DOCKER_SCRIPTS}/create_OUDSM.py
 
-# write password file
-echo "$s" > ${ORACLE_DATA}/etc/${OUD_INSTANCE}_pwd.txt
+echo "--- Create WebLogic Server Domain (${DOMAIN_NAME}) -----------------------------"
+echo "  DOMAIN_NAME=${DOMAIN_NAME}"
+echo "  DOMAIN_HOME=${DOMAIN_HOME}"
+echo "  ADMIN_PORT=${ADMIN_PORT}"
+echo "  ADMIN_SSLPORT=${ADMIN_SSLPORT}"
+echo "  ADMIN_USER=${ADMIN_USER}"
 
-echo "--- Create OUD instance --------------------------------------------------------"
-echo "  OUD_INSTANCE      = ${OUD_INSTANCE}"
-echo "  OUD_INSTANCE_BASE = ${OUD_INSTANCE_BASE}"
-echo "  OUD_INSTANCE_HOME = ${OUD_INSTANCE_BASE}/${OUD_INSTANCE}"
-echo "  LDAP_PORT         = ${LDAP_PORT}"
-echo "  LDAPS_PORT        = ${LDAPS_PORT}"
-echo "  REP_PORT          = ${REP_PORT}"
-echo "  ADMIN_PORT        = ${ADMIN_PORT}"
-echo "  ADMIN_USER        = ${ADMIN_USER}"
-echo "  BASEDN            = ${BASEDN}"
-echo ""
-
-# Create an directory
-${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/oud-setup \
-    --cli \
-    --instancePath ${OUD_INSTANCE_HOME}/OUD \
-    --adminConnectorPort ${ADMIN_PORT} \
-    --rootUserDN "${ADMIN_USER}" \
-    --rootUserPasswordFile ${ORACLE_DATA}/etc/${OUD_INSTANCE}_pwd.txt \
-    --ldapPort ${LDAP_PORT} \
-    --ldapsPort ${LDAPS_PORT} \
-    --generateSelfSignedCertificate \
-    --hostname $(hostname) \
-    --baseDN ${BASEDN} \
-    --addBaseEntry \
-    --serverTuning jvm-default \
-    --offlineToolsTuning autotune \
-    --no-prompt \
-    --noPropertiesFile
-
+# Create an empty domain
+${ORACLE_BASE}/product/fmw12.2.1.3.0/oracle_common/common/bin/wlst.sh -skipWLSModuleScanning ${DOCKER_SCRIPTS}/create_OUDSM.py
 if [ $? -eq 0 ]; then
-    echo "--- Successfully created OUD instance (${OUD_INSTANCE}) ------------------------"
-    # Execute custom provided setup scripts
-    /opt/docker/bin/config_OUD_Instance.sh ${OUD_INSTANCE_INIT}
-else
-    echo "--- ERROR creating OUD instance (${OUD_INSTANCE}) ------------------------------"
+    echo "--- Successfully created WebLogic Server Domain (${DOMAIN_NAME}) --------------"
+else 
+    echo "--- ERROR creating WebLogic Server Domain (${DOMAIN_NAME}) --------------------"
 fi
+${DOMAIN_HOME}/bin/setDomainEnv.sh
 # --- EOF -------------------------------------------------------------------

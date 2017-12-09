@@ -41,13 +41,15 @@ if [ -d "${SCRIPTS_ROOT}" ] && [ -n "$(ls -A ${SCRIPTS_ROOT})" ]; then
     for f in ${SCRIPTS_ROOT}/*; do
         case "$f" in
             *.sh)     echo "$0: running $f"; . "$f" ;;
-            *.ldif)   echo "$0: running $f"; echo "exit" | ${OUD_INSTANCE_HOME}/OUD/bin/ldapmodify --defaultAdd --hostname $(hostname) --port ${LDAP_PORT} --bindDN "cn=${ADMIN_USER}" --bindPasswordFile ${PWD_FILE} --filename "$f"; echo ;;
-            *.conf)   echo "$0: running $f"; echo "exit" | ${OUD_INSTANCE_HOME}/OUD/bin/dsconfig --hostname $(hostname) --port ${PORT_ADMIN} --bindDN "cn=${ADMIN_USER}" --bindPasswordFile ${PWD_FILE} --trustAll --no-prompt -F "$f"; echo ;;
+            *.ldif)   echo "$0: running $f"; echo "exit" | ${OUD_INSTANCE_HOME}/OUD/bin/ldapmodify --defaultAdd --hostname $(hostname) --port ${LDAP_PORT} --bindDN "${ADMIN_USER}" --bindPasswordFile ${PWD_FILE} --filename "$f"; echo ;;
+            *.conf)   echo "$0: running $f"; echo "exit" | ${OUD_INSTANCE_HOME}/OUD/bin/dsconfig --hostname $(hostname) --port ${PORT_ADMIN} --bindDN "${ADMIN_USER}" --bindPasswordFile ${PWD_FILE} --trustAll --no-prompt -F "$f"; echo ;;
             *)        echo "$0: ignoring $f" ;;
         esac
         echo "";
     done
     echo "--- Successfully executed user defined -----------------------------------------"
   echo ""
+else
+    echo "--- no user defined scripts to execute -----------------------------------------"
 fi
 # --- EOF -------------------------------------------------------------------

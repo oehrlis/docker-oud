@@ -21,7 +21,8 @@
 # - Support Replication checks for Docker
 # ---------------------------------------------------------------------------
 
-OUD_STATUS="${OUD_LOCAL}/bin/oud_status.sh"
+# set OUD Status Script
+OUD_STATUS=$(find ${ORACLE_BASE} -name oud_status.sh)
 
 # check if OUD Base status scrip is available
 if [ ! -x ${OUD_STATUS} ]; then

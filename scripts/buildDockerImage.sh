@@ -19,23 +19,21 @@
 # -----------------------------------------------------------------------------
 
 # - Customization -----------------------------------------------------------
-
-
+DOCKERID="oehrlis"
+OUD_VERSION="12.2.1.3.0"
+VERBOSE="FALSE"                                        # enable verbose mode
 # - End of Customization ----------------------------------------------------
 
 # - Default Values ----------------------------------------------------------
-VERSION=0.1
+VERSION=1.0
 DOAPPEND="TRUE"                                        # enable log file append
-VERBOSE="FALSE"                                        # enable verbose mode
 SCRIPT_NAME=$(basename $0)                             # Basename of the script
 SCRIPT_DIR=$(dirname $0)
-DOCKERID="oehrlis"
 START_HEADER="START: Start of ${SCRIPT_NAME} (Version ${VERSION}) with $*"
 ERROR=0
 # - End of Default Values ---------------------------------------------------
 
 # - Functions ---------------------------------------------------------------
-
 # ---------------------------------------------------------------------------
 # Purpose....: Display Usage
 # ---------------------------------------------------------------------------
@@ -169,10 +167,10 @@ if [ -z ${IMAGE_TYPE+x} ]; then
     IMAGE_TYPE="OUD"
 fi
 
-# change image typ to upper case
+# change image typ to lower case
 IMAGE_TYPE=$(echo ${IMAGE_TYPE} | tr [:upper:] [:lower:])
 # OUD Image Name
-IMAGE_NAME="${DOCKERID}/${IMAGE_TYPE}"
+IMAGE_NAME="${DOCKERID}/${IMAGE_TYPE}:${OUD_VERSION}"
 DOCKERFILE="${SCRIPT_DIR}/../Dockerfile.${IMAGE_TYPE}"
 DOCKERDIR="${SCRIPT_DIR}/.."
 # identify which image to build

@@ -24,7 +24,7 @@ FROM oraclelinux:7-slim
 
 # Maintainer
 # ----------------------------------------------------------------------
-MAINTAINER Stefan Oehrli <stefan.oehrli@trivadis.com>
+LABEL maintainer="stefan.oehrli@trivadis.com"
 
 # Arguments for MOS Download
 ARG MOS_USER
@@ -48,7 +48,8 @@ ENV DOWNLOAD=/tmp/download \
     ADMIN_PORT=${ADMIN_PORT:-7001} \
     ADMIN_SSLPORT=${ADMIN_SSLPORT:-7002} \
     ADMIN_USER=${ADMIN_USER:-weblogic} \
-    ADMIN_PASSWORD=${ADMIN_PASSWORD:-""}
+    ADMIN_PASSWORD=${ADMIN_PASSWORD:-""} \
+    CREATE_DOMAIN=${CREATE_DOMAIN:-TRUE}
 
 # Use second ENV so that variable get substituted
 ENV DOMAIN_HOME=${DOMAIN_BASE}/${DOMAIN_NAME} \
@@ -72,10 +73,16 @@ RUN ${DOCKER_SCRIPTS}/setup_oudsm.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PAS
 # OUD admin and ldap ports as well the OUDSM console
 EXPOSE ${ADMIN_PORT} ${ADMIN_SSLPORT}
 
+# run container health check
+#HEALTHCHECK --interval=1m --start-period=5m \
+#   CMD "/opt/docker/bin/check_OUD_Instance.sh" >/dev/null || exit 1
+
 # Oracle data volume for OUD instance and configuration files
 VOLUME ["${ORACLE_DATA}"]
 
+# set workding directory
+WORKDIR ${ORACLE_BASE}
+
 # entrypoint for OUDSM domain creation, startup and graceful shutdown
-#ENTRYPOINT ["/opt/docker/bin/create_and_start_OUDSM_Domain.sh"]
-CMD ["/opt/docker/bin/create_and_start_OUDSM_Domain.sh"]
+CMD ["/opt/docker/bin/start_OUDSM_Domain.sh"]
 # --- EOF --------------------------------------------------------------

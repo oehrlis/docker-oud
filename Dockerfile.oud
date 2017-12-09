@@ -24,7 +24,7 @@ FROM oraclelinux:7-slim
 
 # Maintainer
 # ----------------------------------------------------------------------
-MAINTAINER Stefan Oehrli <stefan.oehrli@trivadis.com>
+LABEL maintainer="stefan.oehrli@trivadis.com"
 
 # Arguments for MOS Download
 ARG MOS_USER
@@ -49,7 +49,7 @@ ENV DOWNLOAD=/tmp/download \
     LDAPS_PORT=${LDAPS_PORT:-1636} \
     REP_PORT=${REP_PORT:-8989} \
     ADMIN_PORT=${ADMIN_PORT:-4444} \
-    ADMIN_USER=${ADMIN_USER:-'Directory Manager'} \
+    ADMIN_USER=${ADMIN_USER:-'cn=Directory Manager'} \
     ADMIN_PASSWORD=${ADMIN_PASSWORD:-""} \
     BASEDN=${BASEDN:-'dc=postgasse,dc=org'} \
     SAMPLE_DATA=${SAMPLE_DATA:-TRUE} \
@@ -81,10 +81,13 @@ EXPOSE ${LDAP_PORT} ${LDAPS_PORT} ${ADMIN_PORT} ${REP_PORT}
 
 # run container health check
 HEALTHCHECK --interval=1m --start-period=5m \
-   CMD "${ORACLE_BASE}/local/bin/check_OUD_Instance.sh" >/dev/null || exit 1
+   CMD "/opt/docker/bin/check_OUD_Instance.sh" >/dev/null || exit 1
 
 # Oracle data volume for OUD instance and configuration files
 VOLUME ["${ORACLE_DATA}"]
+
+# set workding directory
+WORKDIR ${ORACLE_BASE}
 
 # Define default command to start OUD instance
 CMD ["/opt/docker/bin/start_OUD_Instance.sh"]

@@ -3,16 +3,15 @@
 # Trivadis AG, Infrastructure Managed Services
 # Saegereistrasse 29, 8152 Glattbrugg, Switzerland
 # ---------------------------------------------------------------------------
-# Name.......: start_OUD_Instance.sh 
+# Name.......: start_OUDSM_Domain.sh 
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
-# Purpose....: Helper script to start the OUD instance 
-# Notes......: Script does look for the config.ldif. If it does not exist
+# Purpose....: Build script for docker image 
+# Notes......: Script does look for the AdminServer.log. If it does not exist
 #              it assume that the container is started the first time. A new
-#              OUD instance will be created. If CREATE_INSTANCE is set to false
-#              no instance will be created.
+#              OUDSM domain will be created.
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0
 # ---------------------------------------------------------------------------
@@ -22,93 +21,79 @@
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
-# SIGINT handler
+# SIGTERM handler
 # ---------------------------------------------------------------------------
-function int_oud() {
+function int_wls() {
     echo "---------------------------------------------------------------"
-    echo "SIGINT received, shutting down OUD instance!"
+    echo "SIGINT received, shutting down the WLS OUDSM Domain!"
     echo "---------------------------------------------------------------"
-    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds
+    ${DOMAIN_HOME}/bin/stopWebLogic.sh
 }
 
 # ---------------------------------------------------------------------------
 # SIGTERM handler
 # ---------------------------------------------------------------------------
-function term_oud() {
+function term_wls() {
     echo "---------------------------------------------------------------"
-    echo "SIGTERM received, shutting down OUD instance!"
+    echo "SIGTERM received, shutting down the WLS OUDSM Domain!"
     echo "---------------------------------------------------------------"
-    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds
+    ${DOMAIN_HOME}/bin/stopWebLogic.sh
 }
 
 # ---------------------------------------------------------------------------
 # SIGKILL handler
 # ---------------------------------------------------------------------------
-function kill_oud() {
+function kill_wls() {
     echo "---------------------------------------------------------------"
-    echo "SIGKILL received, shutting down OUD instance!"
+    echo "SIGKILL received, shutting down the WLS OUDSM Domain!"
     echo "---------------------------------------------------------------"
 kill -9 $childPID
 }
 
 # Set SIGTERM handler
-trap int_oud SIGINT
+trap int_wls SIGINT
 
 # Set SIGTERM handler
-trap term_oud SIGTERM
+trap term_wls SIGTERM
 
 # Set SIGKILL handler
-trap kill_oud SIGKILL
+trap kill_wls SIGKILL
 
 # Normalize CREATE_INSTANCE
-export CREATE_INSTANCE=$(echo $CREATE_INSTANCE| sed 's/^false$/0/gi')
-export CREATE_INSTANCE=$(echo $CREATE_INSTANCE| sed 's/^true$/1/gi')
+export CREATE_DOMAIN=$(echo $CREATE_DOMAIN| sed 's/^false$/0/gi')
+export CREATE_DOMAIN=$(echo $CREATE_DOMAIN| sed 's/^true$/1/gi')
 
-echo "--- Seeking for an OUD environment on volume ${ORACLE_DATA} -------------"
-# check if config.ldif does exists
-if [ -f ${OUD_INSTANCE_HOME}/OUD/config/config.ldif ]; then
-    # Start existing OUD instance
+echo "--- Seeking for an OUDSM environment on volume ${ORACLE_DATA} -------------"
+# check if AdminServer.log does exists
+if [ -f ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log ]; then
+    # Start existing OUDSM domain
     echo "---------------------------------------------------------------"
-    echo "   Start OUD instance (${OUD_INSTANCE}):"
+    echo "   Start Oracle WebLogic Server Domain (${DOMAIN_NAME}):"
     echo "---------------------------------------------------------------"
-    ${OUD_INSTANCE_HOME}/OUD/bin/start-ds
-elif [ ${CREATE_INSTANCE} -eq 1 ]; then
+    ${DOMAIN_HOME}/startWebLogic.sh
+elif [ ${CREATE_DOMAIN} -eq 1 ]; then
     echo "---------------------------------------------------------------"
-    echo "   Create OUD instance (${OUD_INSTANCE}):"
+    echo "   Create Oracle WebLogic Server Domain (${DOMAIN_NAME}):"
     echo "---------------------------------------------------------------"
-    # CREATE_INSTANCE is true, therefore we will create new OUD instance
-    /opt/docker/bin/create_OUD_Instance.sh
+    # CREATE_DOMAIN is true, therefore we will create new OUDSM domain
+    /opt/docker/bin/create_OUDSM_Domain.sh
     
-    # restart OUD instance
-    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds --restart
+    # start OUDSM instance
+    echo "---------------------------------------------------------------"
+    echo "   Start Oracle WebLogic Server Domain (${DOMAIN_NAME}):"
+    echo "---------------------------------------------------------------"
+    ${DOMAIN_HOME}/startWebLogic.sh
 else
     echo "---------------------------------------------------------------"
-    echo "   WARNING: OUD config.ldif does not exist and CREATE_INSTANCE "
-    echo "   is false. OUD instance has to be created manually using"
-    echo "   oud_setup or oud-proxy-setup via cli"
+    echo "   WARNING: OUDSM AdminServer.log does not exist and DOMAIN_NAME "
+    echo "   is false. OUDSM domain has to be created manually"
     echo "---------------------------------------------------------------"
 fi
 
-# Check whether OUD instance is up and running
-/opt/docker/bin/check_OUD_Instance.sh >/dev/null
-if [ $? -eq 0 ]; then
-    echo "---------------------------------------------------------------"
-    echo "   OUD instance is ready to use:"
-    echo "   Instance Name      : ${OUD_INSTANCE}"
-    echo "   Instance Home (ok) : ${OUD_INSTANCE_HOME}"
-    echo "   Oracle Home        : ${ORACLE_BASE}/product/${ORACLE_HOME_NAME}"
-    echo "   Instance Status    : up"
-    echo "   LDAP Port          : ${LDAP_PORT}"
-    echo "   LDAPS Port         : ${LDAPS_PORT}"
-    echo "   Admin Port         : ${ADMIN_PORT}"
-    echo "   Replication Port   : ${REP_PORT}"
-    echo "---------------------------------------------------------------"
-fi
-
-# Tail on server log and wait (otherwise container will exit)
-mkdir -p ${OUD_INSTANCE_HOME}/OUD/logs
-touch ${OUD_INSTANCE_HOME}/OUD/logs/server.out
-tail -f ${OUD_INSTANCE_HOME}/OUD/logs/server.out &
+# Start Admin Server and tail the logs
+mkdir -p ${DOMAIN_HOME}/servers/AdminServer/logs
+touch ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log
+tail -f ${DOMAIN_HOME}/servers/AdminServer/logs/AdminServer.log &
 
 childPID=$!
 wait $childPID
