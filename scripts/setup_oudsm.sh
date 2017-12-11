@@ -104,3 +104,4 @@ echo "--- Clean up yum cache and temporary download files ----------------------
 rm -rf ${DOWNLOAD}/*
 rm -rf ${DOCKER_SCRIPTS}/.netrc
 echo "=== Done runing $0 ==================================="
+# --- EOF -------------------------------------------------------------------

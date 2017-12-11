@@ -20,6 +20,13 @@
 # see git revision history for more information on changes/updates
 # TODO.......:
 # ---------------------------------------------------------------------------
+# - Customization -----------------------------------------------------------
+export OUD_INSTANCE=${OUD_INSTANCE:-oud_docker}     # Default name for OUD instance
+export CREATE_INSTANCE=${CREATE_INSTANCE:-'TRUE'}   # Flag to create instance
+
+# OUD instance home directory
+export OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE}
+# - End of Customization ----------------------------------------------------
 
 # ---------------------------------------------------------------------------
 # SIGINT handler
@@ -77,10 +84,12 @@ elif [ ${CREATE_INSTANCE} -eq 1 ]; then
     echo "   Create OUD instance (${OUD_INSTANCE}):"
     echo "---------------------------------------------------------------"
     # CREATE_INSTANCE is true, therefore we will create new OUD instance
-    /opt/docker/bin/create_OUD_Instance.sh
+    ${DOCKER_SCRIPTS}/create_OUD_Instance.sh
     
-    # restart OUD instance
-    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds --restart
+    if [ $? -eq 0 ]; then
+        # restart OUD instance
+        ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds --restart
+    fi
 else
     echo "---------------------------------------------------------------"
     echo "   WARNING: OUD config.ldif does not exist and CREATE_INSTANCE "
@@ -90,7 +99,7 @@ else
 fi
 
 # Check whether OUD instance is up and running
-/opt/docker/bin/check_OUD_Instance.sh >/dev/null
+${DOCKER_SCRIPTS}/check_OUD_Instance.sh >/dev/null
 if [ $? -eq 0 ]; then
     echo "---------------------------------------------------------------"
     echo "   OUD instance is ready to use:"

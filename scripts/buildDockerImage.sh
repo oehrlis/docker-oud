@@ -170,7 +170,8 @@ fi
 # change image typ to lower case
 IMAGE_TYPE=$(echo ${IMAGE_TYPE} | tr [:upper:] [:lower:])
 # OUD Image Name
-IMAGE_NAME="${DOCKERID}/${IMAGE_TYPE}:${OUD_VERSION}"
+#IMAGE_NAME="${DOCKERID}/${IMAGE_TYPE}:${OUD_VERSION}"
+IMAGE_NAME="${DOCKERID}/${IMAGE_TYPE}"
 DOCKERFILE="${SCRIPT_DIR}/../Dockerfile.${IMAGE_TYPE}"
 DOCKERDIR="${SCRIPT_DIR}/.."
 # identify which image to build
@@ -189,3 +190,4 @@ fi
 DoMsg "INFO : Oracle Unified Directory Docker Image for ${IMAGE_TYPE} is ready"
 DoMsg "INFO : Build completed in $BUILD_ELAPSED seconds."
 CleanAndQuit 0
+# --- EOF -------------------------------------------------------------------

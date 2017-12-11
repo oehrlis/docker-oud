@@ -19,6 +19,16 @@
 # see git revision history for more information on changes/updates
 # TODO.......:
 # ---------------------------------------------------------------------------
+# Environment variables required for this build (do NOT change)
+# -------------------------------------------------------------
+
+# - Customization -----------------------------------------------------------
+export DOMAIN_NAME=${DOMAIN_NAME:-oudsm_domain}         # Default for OUDSM domain
+export CREATE_DOMAIN=${CREATE_DOMAIN:-'TRUE'}       # Flag to create domain
+
+# OUDSM domain home directory
+export DOMAIN_HOME=${DOMAIN_BASE}/${DOMAIN_NAME}
+# - End of Customization ----------------------------------------------------
 
 # ---------------------------------------------------------------------------
 # SIGTERM handler

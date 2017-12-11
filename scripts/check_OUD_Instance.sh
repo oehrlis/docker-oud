@@ -26,13 +26,13 @@ OUD_STATUS=$(find ${ORACLE_BASE} -name oud_status.sh)
 
 # check if OUD Base status scrip is available
 if [ ! -x ${OUD_STATUS} ]; then
-    echo "Can not find check script ${OUD_STATUS}"
+    echo "$0: Can not find check script ${OUD_STATUS}"
     exit 1
 fi
 
 # check if password file is available
 if [ ! -e ${PWD_FILE} ]; then
-    echo "Can not find password file ${PWD_FILE}"
+    echo "$0: Can not find password file ${PWD_FILE}"
     exit 1
 fi
 
@@ -42,7 +42,7 @@ ${OUD_STATUS} -v -j ${PWD_FILE} -i ${OUD_INSTANCE}
 # normalize output for docker....
 OUD_ERROR=$?
 if [ ${OUD_ERROR} -gt 0 ]; then
-    echo "OUD check (${OUD_STATUS}) did return error ${OUD_ERROR}"
+    echo "$0: OUD check (${OUD_STATUS}) did return error ${OUD_ERROR}"
     exit 1
 else
     exit 0

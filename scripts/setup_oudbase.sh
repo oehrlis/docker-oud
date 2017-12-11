@@ -52,6 +52,7 @@ mkdir -v -p ${ORACLE_BASE}
 mkdir -v -p ${ORACLE_BASE}/local
 mkdir -v -p ${ORACLE_BASE}/product
 mkdir -v -p ${ORACLE_DATA}
+ln -s ${ORACLE_DATA}/scripts /docker-entrypoint-initdb.d
 
 echo "--- Setup OUD base environment -------------------------------------------------"
 # OUD Base package if it does not exist /tmp/download

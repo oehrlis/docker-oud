@@ -3,16 +3,14 @@
 # Trivadis AG, Infrastructure Managed Services
 # Saegereistrasse 29, 8152 Glattbrugg, Switzerland
 # ---------------------------------------------------------------------------
-# Name.......: create_and_start_OUD_instance.sh 
+# Name.......: create_OUD_instance.sh 
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
-# Purpose....: Build script for docker image 
-# Notes......: Script does look for the config.ldif. If it does not exist
-#              it assume that the container is started the first time. A new
-#              OUD instance will be created. If CREATE_INSTANCE is set to false
-#              no instance will be created.
+# Purpose....: Helper script to create the OUD instance 
+# Notes......: Script to create an OUD instance. If configuration files are
+#              provided, the will be used to configure the instance.
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0
 # ---------------------------------------------------------------------------
@@ -20,6 +18,21 @@
 # see git revision history for more information on changes/updates
 # TODO.......:
 # ---------------------------------------------------------------------------
+# - Customization -----------------------------------------------------------
+export LDAP_PORT=${LDAP_PORT:-1389}                     # Default LDAP port
+export LDAPS_PORT=${LDAPS_PORT:-1636}                   # Default LDAPS port
+export REP_PORT=${REP_PORT:-8989}                       # Default replication port
+export ADMIN_PORT=${ADMIN_PORT:-4444}                   # Default admin port
+export ADMIN_USER=${ADMIN_USER:-'cn=Directory Manager'} # Default directory admin user
+export ADMIN_PASSWORD=${ADMIN_PASSWORD:-""}             # Default directory admin password
+export BASEDN=${BASEDN:-'dc=postgasse,dc=org'}          # Default directory base DN
+export SAMPLE_DATA=${SAMPLE_DATA:-'TRUE'}               # Flag to load sample data
+export OUD_PROXY=${OUD_PROXY:-'FALSE'}                  # Flag to create proxy instance
+
+# default folder for OUD instance init scripts
+export OUD_INSTANCE_INIT=${OUD_INSTANCE_INIT:-$ORACLE_DATA/scripts}
+# - End of Customization ----------------------------------------------------
+
 echo "--- Setup OUD environment on volume ${ORACLE_DATA} --------------------"
 
 # create instance and domain directories on volume
@@ -29,6 +42,7 @@ mkdir -v -p ${ORACLE_DATA}/domains
 mkdir -v -p ${ORACLE_DATA}/etc
 mkdir -v -p ${ORACLE_DATA}/instances
 mkdir -v -p ${ORACLE_DATA}/log
+mkdir -v -p ${ORACLE_DATA}/scripts
 
 # create oudtab file
 OUDTAB=${ORACLE_DATA}/etc/oudtab
@@ -84,8 +98,14 @@ echo "  REP_PORT          = ${REP_PORT}"
 echo "  ADMIN_PORT        = ${ADMIN_PORT}"
 echo "  ADMIN_USER        = ${ADMIN_USER}"
 echo "  BASEDN            = ${BASEDN}"
+echo "  OUD_PROXY         = ${OUD_PROXY}"
 echo ""
 
+# Normalize CREATE_INSTANCE
+export OUD_PROXY=$(echo $OUD_PROXY| sed 's/^false$/0/gi')
+export OUD_PROXY=$(echo $OUD_PROXY| sed 's/^true$/1/gi')
+
+if [ ${OUD_PROXY} -eq 0 ]; then
 # Create an directory
 ${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/oud-setup \
     --cli \
@@ -103,12 +123,13 @@ ${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/oud-setup \
     --offlineToolsTuning autotune \
     --no-prompt \
     --noPropertiesFile
-
-if [ $? -eq 0 ]; then
-    echo "--- Successfully created OUD instance (${OUD_INSTANCE}) ------------------------"
-    # Execute custom provided setup scripts
-    /opt/docker/bin/config_OUD_Instance.sh ${OUD_INSTANCE_INIT}
-else
-    echo "--- ERROR creating OUD instance (${OUD_INSTANCE}) ------------------------------"
+    if [ $? -eq 0 ]; then
+        echo "--- Successfully created OUD instance (${OUD_INSTANCE}) ------------------------"
+        # Execute custom provided setup scripts
+        ${DOCKER_SCRIPTS}/config_OUD_Instance.sh ${OUD_INSTANCE_INIT}/setup
+    else
+        echo "--- ERROR creating OUD instance (${OUD_INSTANCE}) ------------------------------"
+        exit 1
+    fi
 fi
 # --- EOF -------------------------------------------------------------------

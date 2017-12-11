@@ -54,7 +54,7 @@ echo "--- Upgrade OS and install additional Packages ---------------------------
 yum upgrade -y
 
 # install basic packages 
-yum install -y unzip gzip tar hostname which procps-ng
+yum install -y unzip zip gzip tar hostname which procps-ng
 
 # remove unwanted locales, the did come in with yum upgrade....
 /usr/bin/localedef --list-archive | grep -v -i ^en | xargs /usr/bin/localedef --verbose --delete-from-archive

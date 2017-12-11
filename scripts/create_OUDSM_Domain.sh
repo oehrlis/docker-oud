@@ -8,10 +8,8 @@
 # Editor.....: Stefan Oehrli
 # Date.......: 2017.12.04
 # Revision...: 
-# Purpose....: Build script for docker image 
-# Notes......: Script does look for the AdminServer.log. If it does not exist
-#              it assume that the container is started the first time. A new
-#              OUDSM domain will be created.
+# Purpose....: Helper script to create the OUDSM domain  
+# Notes......: Script to create an OUDSM domain.
 # Reference..: --
 # License....: CDDL 1.0 + GPL 2.0
 # ---------------------------------------------------------------------------
@@ -20,6 +18,13 @@
 # TODO.......:
 # ---------------------------------------------------------------------------
 
+# - Customization -----------------------------------------------------------
+export ADMIN_PORT=${ADMIN_PORT:-7001}       # Default admin port
+export ADMIN_SSLPORT=${ADMIN_SSLPORT:-7002} # Default SSL admin port
+export ADMIN_USER=${ADMIN_USER:-weblogic}   # Default directory admin user
+export ADMIN_PASSWORD=${ADMIN_PASSWORD:-""} # Default directory admin password
+
+# - End of Customization ----------------------------------------------------
 echo "--- Setup OUDSM environment on volume ${ORACLE_DATA} --------------------"
 # create instance and domain directories on volume
 mkdir -v -p ${ORACLE_DATA}
@@ -38,7 +43,7 @@ echo "#  3 : OUD LDAPS Port"                            >>${OUDTAB}
 echo "#  4 : OUD Admin Port"                            >>${OUDTAB}
 echo "#  5 : OUD Replication Port"                      >>${OUDTAB}
 echo "#---------------------------------------------"   >>${OUDTAB}
-echo "${INSTANCE_NAME}:${LDAP_PORT}:${LDAP_PORT}:${ADMIN_PORT}:${REP_PORT}" >>${OUDTAB}
+echo "${DOMAIN_NAME}:${LDAP_PORT}:${LDAP_PORT}:${ADMIN_PORT}:${REP_PORT}" >>${OUDTAB}
 
 # copy default config files
 cp ${ORACLE_BASE}/local/etc/*.conf ${ORACLE_DATA}/etc
