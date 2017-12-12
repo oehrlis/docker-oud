@@ -21,6 +21,9 @@
 # - Support Replication checks for Docker
 # ---------------------------------------------------------------------------
 
+# Load OUD environment
+. $(find $ORACLE_BASE -name oudenv.sh) ${OUD_INSTANCE} SILENT
+
 # set OUD Status Script
 OUD_STATUS=$(find ${ORACLE_BASE} -name oud_status.sh)
 
