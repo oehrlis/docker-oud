@@ -38,6 +38,7 @@ export FMW_JAR=fmw_12.2.1.3.0_infrastructure.jar
 if [[ ! -z "${MOS_USER}" ]]; then
     if [[ ! -z "${MOS_PASSWORD}" ]]; then
         echo "machine login.oracle.com login ${MOS_USER} password ${MOS_PASSWORD}" >${DOCKER_SCRIPTS}/.netrc
+        echo "machine updates.oracle.com login ${MOS_USER} password ${MOS_PASSWORD}" >>${DOCKER_SCRIPTS}/.netrc
     else
         echo "MOS_PASSWORD is empty"
     fi
