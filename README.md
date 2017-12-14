@@ -132,13 +132,13 @@ Build the docker image either by using `docker build` or `buildDockerImage.sh`.
     scripts/buildDockerImage.sh -v -t OUDSM
 
 ### Automatic download with .netrc
-The advantage of an automatic software download during build is the reduced image size. No additional image layers are created for the software and the final docker image is about 3GB smaller. But the setup script (`setup_oud.sh`) requires the MOS credentials to download the software with [curl](https://linux.die.net/man/1/curl). Curl does read the credentials from the ```.netrc``` file in ```scripts``` folder. The ```.netrc``` file will be copied to ```/opt/docker/bin/.netrc```, but it will be removed at the end of the build.
+The advantage of an automatic software download during build is the reduced image size. No additional image layers are created for the software and the final docker image is about 3GB smaller. But the setup script (`setup_oud.sh`) requires the MOS credentials to download the software with [curl](https://linux.die.net/man/1/curl). Curl does read the credentials from the `.netrc` file in `scripts` folder. The `.netrc` file will be copied to `/opt/docker/bin/.netrc`, but it will be removed at the end of the build.
 
-Create a ```.netrc``` file with the credentials for *login.oracle.com*.
+Create a `.netrc` file with the credentials for *login.oracle.com*.
 
     echo "machine login.oracle.com login <MOS_USER> password <MOS_PASSWORD>" >docker-oud/scripts/.netrc
 
-    Build the docker image either by using `docker build` or `build.sh`.
+Build the docker image either by using `docker build` or `buildDockerImage.sh`.
 
         docker build -t oehrlis/oud -f Dockerfile.oud .
         docker build -t oehrlis/oudsm -f Dockerfile.oudsm .
@@ -147,7 +147,7 @@ Create a ```.netrc``` file with the credentials for *login.oracle.com*.
         scripts/buildDockerImage.sh -v -t OUDSM
 
 ### Automatic download with Build Arguments
-This method is similar to the automatic download with ```.netrc``` file. Instead of manually creating a ```.netrc``` file it will created based on build parameters. Also with this method the ```.netrc``` file is deleted at the end.
+This method is similar to the automatic download with `.netrc` file. Instead of manually creating a `.netrc` file it will created based on build parameters. Also with this method the `.netrc` file is deleted at the end.
 
 Build the docker image with MOS credentials as arguments.
 
