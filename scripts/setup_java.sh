@@ -22,6 +22,11 @@
 MOS_USER="${1#*=}"
 MOS_PASSWORD="${2#*=}"
 
+echo "--- $0 ---------------------------------"
+echo " MOS_USER=$MOS_USER"
+echo " MOS_PASSWORD=$MOS_PASSWORD"
+echo "--- $0 ---------------------------------"
+
 # Download and Package Variables
 # JAVA 1.8u152 https://updates.oracle.com/ARULink/PatchDetails/process_form?patch_num=2659589
 export JAVA_URL="https://updates.oracle.com/Orion/Services/download/p26595894_180152_Linux-x86-64.zip?aru=21611278&patch_file=p26595894_180152_Linux-x86-64.zip"
@@ -66,7 +71,7 @@ if [ ! -e ${DOWNLOAD}/${JAVA_PKG} ]
 then
     
     echo "--- Download Server JRE 8u152 from MOS -----------------------------------------"
-    curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar cookie-jar.txt \
+    curl --verbose --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar cookie-jar.txt \
     --location-trusted ${JAVA_URL} -o ${DOWNLOAD}/${JAVA_PKG}
 else
     echo "--- Use local copy of ${DOWNLOAD}/${JAVA_PKG} --------------------------------------"
