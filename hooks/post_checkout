@@ -1,2 +1,3 @@
 #!/bin/bash
+echo "copy Docker file"
 cp -v Dockerfile.oud Dockerfile
