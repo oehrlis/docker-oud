@@ -52,6 +52,14 @@ mkdir -v -p ${ORACLE_BASE}
 mkdir -v -p ${ORACLE_BASE}/local
 mkdir -v -p ${ORACLE_BASE}/product
 mkdir -v -p ${ORACLE_DATA}
+# create instance and domain directories on volume
+mkdir -v -p ${ORACLE_DATA}
+mkdir -v -p ${ORACLE_DATA}/backup
+mkdir -v -p ${ORACLE_DATA}/domains
+mkdir -v -p ${ORACLE_DATA}/etc
+mkdir -v -p ${ORACLE_DATA}/instances
+mkdir -v -p ${ORACLE_DATA}/log
+mkdir -v -p ${ORACLE_DATA}/scripts
 ln -s ${ORACLE_DATA}/scripts /docker-entrypoint-initdb.d
 
 echo "--- Setup OUD base environment -------------------------------------------------"
