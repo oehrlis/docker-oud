@@ -90,8 +90,8 @@ echo "$s" > ${ORACLE_DATA}/etc/${OUD_INSTANCE}_pwd.txt
 
 echo "--- Create OUD instance --------------------------------------------------------"
 echo "  OUD_INSTANCE      = ${OUD_INSTANCE}"
-echo "  OUD_INSTANCE_BASE = ${OUD_INSTANCE_BASE}"
-echo "  OUD_INSTANCE_HOME = ${OUD_INSTANCE_BASE}/${OUD_INSTANCE}"
+echo "  OUD_INSTANCE_BASE = ${INSTANCE_BASE}"
+echo "  OUD_INSTANCE_HOME = ${INSTANCE_BASE}/${OUD_INSTANCE}"
 echo "  LDAP_PORT         = ${LDAP_PORT}"
 echo "  LDAPS_PORT        = ${LDAPS_PORT}"
 echo "  REP_PORT          = ${REP_PORT}"

@@ -35,9 +35,9 @@ ORACLE_BASE          | `$ORACLE_ROOT/app/oracle`              | docker build | O
 n/a                  | `$ORACLE_BASE/product`                 | no           | Oracle product base directory
 ORACLE_HOME_NAME     | `fmw12.2.1.3.0`                        | no           | Name of the Oracle Home, used to create to PATH to ORACLE_HOME eg. *$ORACLE_BASE/product/$ORACLE_HOME_NAME*
 ORACLE_DATA          | `/u01`                                 | docker build | Root directory for the persistent data eg. OUD instances, OUDSM domain etc. A docker volumes must be defined for */u01*
-OUD_INSTANCE_BASE    | `$ORACLE_DATA/instances`               | no           | Base directory for OUD instances
+INSTANCE_BASE        | `$ORACLE_DATA/instances`               | no           | Base directory for OUD instances
 OUD_INSTANCE         | `oud_docker`                           | docker run   | Default name for OUD instance
-OUD_INSTANCE_HOME    | `${OUD_INSTANCE_BASE}/${OUD_INSTANCE}` | docker run   |
+OUD_INSTANCE_HOME    | `${INSTANCE_BASE}/${OUD_INSTANCE}` | docker run   |
 CREATE_INSTANCE      | `TRUE`                                 | docker run   | Flag to create OUD instance on first start of the container
 OUD_PROXY            | `FALSE`                                | docker run   | Flag to create proxy instance. Not yet implemented.
 OUD_INSTANCE_INIT    | `$ORACLE_DATA/scripts`                 | docker run   | Directory for the instance configuration scripts

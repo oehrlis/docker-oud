@@ -25,7 +25,7 @@ export OUD_INSTANCE=${OUD_INSTANCE:-oud_docker}     # Default name for OUD insta
 export CREATE_INSTANCE=${CREATE_INSTANCE:-'TRUE'}   # Flag to create instance
 
 # OUD instance home directory
-export OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE}
+export OUD_INSTANCE_HOME=${INSTANCE_BASE}/${OUD_INSTANCE}
 # - End of Customization ----------------------------------------------------
 
 # ---------------------------------------------------------------------------

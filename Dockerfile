@@ -51,7 +51,7 @@ ENV DOWNLOAD="/tmp/download" \
 
 # Use second ENV so that variable get substituted
 ENV ORACLE_BASE=${ORACLE_BASE:-$ORACLE_ROOT/app/oracle} \
-    OUD_INSTANCE_BASE=${OUD_INSTANCE_BASE:-$ORACLE_DATA/instances}
+    INSTANCE_BASE=${INSTANCE_BASE:-$ORACLE_DATA/instances}
 
 # same same but third ENV so that variable get substituted
 ENV PATH=${PATH}:"${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/bin"
