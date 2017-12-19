@@ -54,7 +54,7 @@ ENV ORACLE_BASE=${ORACLE_BASE:-$ORACLE_ROOT/app/oracle} \
     INSTANCE_BASE=${INSTANCE_BASE:-$ORACLE_DATA/instances}
 
 # same same but third ENV so that variable get substituted
-ENV PATH=${PATH}:"${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/bin"
+ENV PATH=${PATH}:"${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/oud/bin:${DOCKER_SCRIPTS}"
 
 # copy all setup scripts to DOCKER_BIN
 COPY scripts ${DOCKER_SCRIPTS}
