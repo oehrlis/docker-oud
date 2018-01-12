@@ -43,23 +43,25 @@ useradd --create-home --gid oinstall --shell /bin/bash \
     --groups oinstall,osdba,osoper,osbackupdba,osdgdba,oskmdba \
     oracle
 
+# remove the copies of the group and password files
+rm /etc/group- /etc/gshadow- /etc/passwd- /etc/shadow-
+
 echo "--- Create OFA directory structure"
 # create oracle directories
-mkdir -v -p ${ORACLE_ROOT}
+install --owner oracle --group oinstall --mode=775 --verbose --directory \
+    ${ORACLE_ROOT} \
+    ${ORACLE_DATA} \
+    ${ORACLE_DATA}/backup \
+    ${ORACLE_DATA}/domains \
+    ${ORACLE_DATA}/etc \
+    ${ORACLE_DATA}/instances \
+    ${ORACLE_DATA}/log \
+    ${ORACLE_DATA}/scripts \
+    ${ORACLE_BASE}/etc \
+    ${ORACLE_BASE}/network/admin \
+    ${ORACLE_BASE}/local \
+    ${ORACLE_BASE}/product
 
-# create base directories
-mkdir -v -p ${ORACLE_BASE}
-mkdir -v -p ${ORACLE_BASE}/local
-mkdir -v -p ${ORACLE_BASE}/product
-mkdir -v -p ${ORACLE_DATA}
-# create instance and domain directories on volume
-mkdir -v -p ${ORACLE_DATA}
-mkdir -v -p ${ORACLE_DATA}/backup
-mkdir -v -p ${ORACLE_DATA}/domains
-mkdir -v -p ${ORACLE_DATA}/etc
-mkdir -v -p ${ORACLE_DATA}/instances
-mkdir -v -p ${ORACLE_DATA}/log
-mkdir -v -p ${ORACLE_DATA}/scripts
 ln -s ${ORACLE_DATA}/scripts /docker-entrypoint-initdb.d
 
 echo "--- Setup OUD base environment -------------------------------------------------"
