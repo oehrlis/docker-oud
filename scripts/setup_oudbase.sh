@@ -92,10 +92,10 @@ echo '  fi'                                               >>"${PROFILE}"
 echo 'fi'                                                 >>"${PROFILE}"
 echo ''                                                   >>"${PROFILE}"
 echo '# define an oudenv alias'                           >>"${PROFILE}"
-echo 'alias oud=". $(find ${OUD_BASE} -name oudenv.sh)"'  >>"${PROFILE}"
+echo 'alias oud=". ${OUD_BASE}/local/bin/oudenv.sh"'      >>"${PROFILE}"
 echo ''                                                   >>"${PROFILE}"
 echo '# source oud environment'                           >>"${PROFILE}"
-echo '. $(find ${OUD_BASE} -name oudenv.sh)'              >>"${PROFILE}"
+echo '. ${OUD_BASE}/local/bin/oudenv.sh'                  >>"${PROFILE}"
 
 echo "--- Create response and inventory loc files"
 # set the response_file and inventory loc file

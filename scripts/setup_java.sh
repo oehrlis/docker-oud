@@ -23,8 +23,8 @@ MOS_USER="${1#*=}"
 MOS_PASSWORD="${2#*=}"
 
 # Download and Package Variables
-# JAVA 1.8u152 https://updates.oracle.com/ARULink/PatchDetails/process_form?patch_num=2659589
-export JAVA_URL="https://updates.oracle.com/Orion/Services/download/p26595894_180152_Linux-x86-64.zip?aru=21611278&patch_file=p26595894_180152_Linux-x86-64.zip"
+# JAVA 1.8u162 https://updates.oracle.com/ARULink/PatchDetails/process_form?patch_num=27217289
+export JAVA_URL="https://updates.oracle.com/Orion/Services/download/p27217289_180162_Linux-x86-64.zip?aru=21855272&patch_file=p27217289_180162_Linux-x86-64.zip"
 export JAVA_PKG=${JAVA_URL#*patch_file=}
 
 # define environment variables
