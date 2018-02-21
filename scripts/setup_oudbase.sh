@@ -23,6 +23,19 @@
 OUDBASE_URL="https://github.com/oehrlis/oudbase/raw/master/build/oudbase_install.sh"
 OUDBASE_PKG="oudbase_install.sh"
 
+mkdir -p ${DOWNLOAD}
+chmod 777 ${DOWNLOAD}
+
+echo "--- Upgrade OS and install additional Packages ---------------------------------"
+# limit locale to the different english languages
+echo "%_install_langs   en" >/etc/rpm/macros.lang
+
+# update existing packages
+yum upgrade -y
+
+# install basic packages 
+yum install -y unzip zip gzip tar hostname which procps-ng
+
 echo "--- Setup Oracle OFA environment -----------------------------------------------"
 echo " ORACLE_ROOT=${ORACLE_ROOT}"
 echo " ORACLE_DATA=${ORACLE_DATA}"
@@ -43,24 +56,13 @@ useradd --create-home --gid oinstall --shell /bin/bash \
     --groups oinstall,osdba,osoper,osbackupdba,osdgdba,oskmdba \
     oracle
 
-# remove the copies of the group and password files
-rm /etc/group- /etc/gshadow- /etc/passwd- /etc/shadow-
-
 echo "--- Create OFA directory structure"
 # create oracle directories
 install --owner oracle --group oinstall --mode=775 --verbose --directory \
     ${ORACLE_ROOT} \
     ${ORACLE_DATA} \
-    ${ORACLE_DATA}/backup \
-    ${ORACLE_DATA}/domains \
-    ${ORACLE_DATA}/etc \
-    ${ORACLE_DATA}/instances \
-    ${ORACLE_DATA}/log \
-    ${ORACLE_DATA}/scripts \
-    ${ORACLE_BASE}/etc \
-    ${ORACLE_BASE}/network/admin \
-    ${ORACLE_BASE}/local \
-    ${ORACLE_BASE}/product
+    ${ORACLE_BASE} \
+    ${ORACLE_DATA}/scripts 
 
 ln -s ${ORACLE_DATA}/scripts /docker-entrypoint-initdb.d
 
@@ -82,30 +84,31 @@ ${DOWNLOAD}/${OUDBASE_PKG} -v -b ${ORACLE_BASE} -d ${ORACLE_DATA}
 
 # update profile
 PROFILE="/home/oracle/.bash_profile"
-echo '# Check OUD_BASE and load if necessary'             >>"${PROFILE}"
-echo 'if [ "${OUD_BASE}" = "" ]; then'                    >>"${PROFILE}"
-echo '  if [ -f "${HOME}/.OUD_BASE" ]; then'              >>"${PROFILE}"
-echo '    . "${HOME}/.OUD_BASE"'                          >>"${PROFILE}"
-echo '  else'                                             >>"${PROFILE}"
-echo '    echo "ERROR: Could not load ${HOME}/.OUD_BASE"' >>"${PROFILE}"
-echo '  fi'                                               >>"${PROFILE}"
-echo 'fi'                                                 >>"${PROFILE}"
-echo ''                                                   >>"${PROFILE}"
-echo '# define an oudenv alias'                           >>"${PROFILE}"
-echo 'alias oud=". ${OUD_BASE}/local/bin/oudenv.sh"'      >>"${PROFILE}"
-echo ''                                                   >>"${PROFILE}"
-echo '# source oud environment'                           >>"${PROFILE}"
-echo '. ${OUD_BASE}/local/bin/oudenv.sh'                  >>"${PROFILE}"
+
+echo "--- update ${PROFILE}"
+echo "# Check OUD_BASE and load if necessary"                >>"${PROFILE}"
+echo "if [ \"\${OUD_BASE}\" = \"\" ]; then"                  >>"${PROFILE}"
+echo "  if [ -f \"\${HOME}/.OUD_BASE\" ]; then"              >>"${PROFILE}"
+echo "    . \"\${HOME}/.OUD_BASE\""                          >>"${PROFILE}"
+echo "  else"                                                >>"${PROFILE}"
+echo "    echo \"ERROR: Could not load \${HOME}/.OUD_BASE\"" >>"${PROFILE}"
+echo "  fi"                                                  >>"${PROFILE}"
+echo "fi"                                                    >>"${PROFILE}"
+echo ""                                                      >>"${PROFILE}"
+echo "# define an oudenv alias"                              >>"${PROFILE}"
+echo "alias oud=\". \${OUD_BASE}/local/bin/oudenv.sh\""      >>"${PROFILE}"
+echo ""                                                      >>"${PROFILE}"
+echo "# source oud environment"                              >>"${PROFILE}"
+echo ". \${OUD_BASE}/local/bin/oudenv.sh"                    >>"${PROFILE}"
 
 echo "--- Create response and inventory loc files"
 # set the response_file and inventory loc file
-export RESPONSE_FILE="${ORACLE_BASE}/local/etc/install.rsp"
-export INS_LOC_FILE="${ORACLE_BASE}/local/etc/oraInst.loc"
+export RESPONSE_FILE="${ORACLE_DATA}/etc/install.rsp"
+export INS_LOC_FILE="${ORACLE_DATA}/etc/oraInst.loc"
 
 # check the response file
 if [ ! -f "${RESPONSE_FILE}" ]; then
-    echo "WARN can not find respone file (${RESPONSE_FILE})"
-    echo "WARN create a new file"
+    echo "--- Create response file ${RESPONSE_FILE}"
     echo "[ENGINE]" > ${RESPONSE_FILE}
     echo "Response File Version=1.0.0.0.0" >> ${RESPONSE_FILE}
     echo "[GENERIC]" >> ${RESPONSE_FILE}
@@ -115,19 +118,22 @@ fi
 
 # check the install loc file
 if [ ! -f "${INS_LOC_FILE}" ]; then
-    echo "WARN can not find installation loc file (${INS_LOC_FILE})"
-    echo "WARN create a new file"
+    echo "--- Create inventory loc file ${INS_LOC_FILE}"
     echo "inventory_loc=${ORACLE_BASE}/oraInventory" > ${INS_LOC_FILE}
     echo "inst_group=oinstall" >> ${INS_LOC_FILE}
 fi
 
 echo "--- Adjust permissions and remove temporary files ------------------------------"
 # make sure that oracle and root has a OUD_BASE
-cp /root/.OUD_BASE /home/oracle/.OUD_BASE
+mv /root/.OUD_BASE /home/oracle/.OUD_BASE
 # adjust user and group permissions
 chmod a+xr ${ORACLE_ROOT} ${ORACLE_DATA} ${DOCKER_SCRIPTS} /home/oracle/.OUD_BASE
 chown oracle:oinstall -R ${ORACLE_BASE} ${ORACLE_DATA} ${DOCKER_SCRIPTS}
 
 # clean up
+echo "--- Clean up yum cache and temporary download files ----------------------------"
+yum clean all
+rm -rf /var/cache/yum
 rm -rf ${DOWNLOAD}/*
-echo "=== Done runing $0 ==============================="
+rm /tmp/oudbase_install.log
+echo "=== Done runing $0 =================================="

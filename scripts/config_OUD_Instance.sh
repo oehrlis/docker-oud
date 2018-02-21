@@ -36,7 +36,7 @@ if [ -z "${SCRIPTS_ROOT}" ]; then
    exit 1;
 fi
 # Load OUD environment
-. $(find $ORACLE_BASE -name oudenv.sh) ${OUD_INSTANCE} SILENT
+. ${ORACLE_BASE}/local/bin/oudenv.sh ${OUD_INSTANCE} SILENT
 
 # Execute custom provided files (only if directory exists and has files in it)
 if [ -d "${SCRIPTS_ROOT}" ] && [ -n "$(ls -A ${SCRIPTS_ROOT})" ]; then

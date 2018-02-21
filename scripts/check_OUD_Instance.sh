@@ -22,10 +22,10 @@
 # ---------------------------------------------------------------------------
 
 # Load OUD environment
-. $(find $ORACLE_BASE -name oudenv.sh) ${OUD_INSTANCE} SILENT
+. ${ORACLE_BASE}/local/bin/oudenv.sh ${OUD_INSTANCE} SILENT
 
 # set OUD Status Script
-OUD_STATUS=$(find ${ORACLE_BASE} -name oud_status.sh)
+OUD_STATUS="${ORACLE_BASE}/local/bin/oud_status.sh"
 
 # check if OUD Base status scrip is available
 if [ ! -x ${OUD_STATUS} ]; then

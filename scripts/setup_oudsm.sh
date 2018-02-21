@@ -22,6 +22,7 @@
 # get the MOS Credentials
 MOS_USER="${1#*=}"
 MOS_PASSWORD="${2#*=}"
+LOCALHOST="${3#*=}"
 
 # Download and Package Variables
 # Oracle Unified Directory 12.2.1.3
@@ -50,25 +51,31 @@ elif [ ! -e ${DOCKER_SCRIPTS}/.netrc ]; then
     >&2 echo "================================================================================="
 fi
 
-# set the response_file and inventory loc file
-export RESPONSE_FILE="${ORACLE_BASE}/local/etc/install.rsp"
-export INS_LOC_FILE="${ORACLE_BASE}/local/etc/oraInst.loc"
+# set the response_file and inventory loc file 
+export RESPONSE_FILE="${ORACLE_DATA}/etc/install.rsp"
+export INS_LOC_FILE="${ORACLE_DATA}/etc/oraInst.loc"
 
 # Download Fusion Middleware Infrastructure 12.2.1.3.0 if it doesn't exist /tmp/download
-if [ ! -e ${DOWNLOAD}/${FMW_PKG} ]
-then
-    echo "--- Download Fusion Middleware Infrastructure 12.2.1.3.0 from MOS --------------"
-    curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
-    --location-trusted $FMW_URL -o ${DOWNLOAD}/${FMW_PKG}
+if [ ! -e ${DOWNLOAD}/${FMW_PKG} ]; then
+    if [ ! "${LOCALHOST}" = "" ]; then
+        echo "--- Download Fusion Middleware Infrastructure 12.2.1.3.0 from ${LOCALHOST}/${FMW_PKG} ---"
+        curl --location-trusted ${LOCALHOST}/${FMW_PKG} -o ${DOWNLOAD}/${FMW_PKG}
+    else
+        echo "--- Download Fusion Middleware Infrastructure 12.2.1.3.0 from MOS --------------"
+        curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
+        --location-trusted $FMW_URL -o ${DOWNLOAD}/${FMW_PKG}
+    fi
 else
     echo "--- Use local copy of ${DOWNLOAD}/${FMW_PKG} ----------------"
 fi
 
 echo "--- Install Fusion Middleware Infrastructure 12.2.1.3.0 ------------------------"
 cd ${DOWNLOAD}
+echo "${DOWNLOAD}/${FMW_PKG}"
 jar xf ${DOWNLOAD}/${FMW_PKG}
 cd -
 
+echo "${DOWNLOAD}/$FMW_JAR"
 # Install FMW in silent mode
 java -jar ${DOWNLOAD}/$FMW_JAR -silent \
     -responseFile "${RESPONSE_FILE}" \
@@ -78,21 +85,27 @@ java -jar ${DOWNLOAD}/$FMW_JAR -silent \
     INSTALL_TYPE="WebLogic Server"
 
 # Download Oracle Unified Directory 12.2.1.3.0 if it doesn't exist /tmp/download
-if [ ! -e ${DOWNLOAD}/${FMW_OUD_PKG} ]
-then
-    echo "--- Download Oracle Unified Directory 12.2.1.3.0 from OTN ----------------------"
-    curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
-    --location-trusted ${FMW_OUD_URL} -o ${DOWNLOAD}/${FMW_OUD_PKG}
+if [ ! -e ${DOWNLOAD}/${FMW_OUD_PKG} ]; then
+    if [ ! "${LOCALHOST}" = "" ]; then
+        echo "--- Download Oracle Unified Directory from ${LOCALHOST}/${FMW_OUD_PKG} ---"
+        curl --location-trusted ${LOCALHOST}/${FMW_OUD_PKG} -o ${DOWNLOAD}/${FMW_OUD_PKG}
+    else
+        echo "--- Download Oracle Unified Directory 12.2.1.3.0 from OTN ----------------------"
+        curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
+        --location-trusted ${FMW_OUD_URL} -o ${DOWNLOAD}/${FMW_OUD_PKG}
+    fi
 else
     echo "--- Use local copy of ${DOWNLOAD}/${FMW_OUD_PKG} ----------------"
-fi  
+fi
 
 echo "--- Install Oracle Unified Directory 12.2.1.3.0 --------------------------------"
 cd ${DOWNLOAD}
+echo "${DOWNLOAD}/${FMW_OUD_PKG}"
 jar xf ${DOWNLOAD}/${FMW_OUD_PKG}
 cd -
 
 # Install OUD in silent mode
+echo "${DOWNLOAD}/$FMW_OUD_JAR"
 java -jar ${DOWNLOAD}/$FMW_OUD_JAR -silent \
     -responseFile "${RESPONSE_FILE}" \
     -invPtrLoc "${INS_LOC_FILE}" \

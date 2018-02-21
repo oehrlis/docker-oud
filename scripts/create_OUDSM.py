@@ -21,8 +21,8 @@ import os
 # define environment variables
 domain_name      = os.environ.get('DOMAIN_NAME', "oudsm_domain")
 domain_path      = os.environ.get('DOMAIN_HOME', "/u01/domains/%s" % domain_name)
-admin_port       = int(os.environ.get('ADMIN_PORT', "7001"))
-admin_sslport    = int(os.environ.get('ADMIN_SSLPORT', "7002"))
+admin_port       = int(os.environ.get('PORT', "7001"))
+admin_sslport    = int(os.environ.get('PORT_SSL', "7002"))
 admin_user       = os.environ.get('ADMIN_USER', "weblogic")
 admin_pass       = "ADMIN_PASSWORD"
 

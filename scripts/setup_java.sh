@@ -21,6 +21,7 @@
 # get the MOS Credentials
 MOS_USER="${1#*=}"
 MOS_PASSWORD="${2#*=}"
+LOCALHOST="${3#*=}"
 
 # Download and Package Variables
 # JAVA 1.8u162 https://updates.oracle.com/ARULink/PatchDetails/process_form?patch_num=27217289
@@ -50,23 +51,16 @@ then
     >&2 echo "================================================================================="
 fi
 
-echo "--- Upgrade OS and install additional Packages ---------------------------------"
-# limit locale to the different english languages
-echo "%_install_langs   en" >/etc/rpm/macros.lang
-
-# update existing packages
-yum upgrade -y
-
-# install basic packages 
-yum install -y unzip zip gzip tar hostname which procps-ng
-
-# Download Server JRE 8u144 package if it does not exist /tmp/download
-if [ ! -e ${DOWNLOAD}/${JAVA_PKG} ]
-then
-    
-    echo "--- Download Server JRE 8u152 from MOS -----------------------------------------"
-    curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar cookie-jar.txt \
-    --location-trusted ${JAVA_URL} -o ${DOWNLOAD}/${JAVA_PKG}
+# Download Server JRE 8u162 package if it does not exist /tmp/download
+if [ ! -e ${DOWNLOAD}/${JAVA_PKG} ]; then
+    if [ ! "${LOCALHOST}" = "" ]; then
+        echo "--- Download Server JRE 8u162 from ${LOCALHOST} -----------------------------------------"
+        curl --location-trusted ${LOCALHOST}/${JAVA_PKG} -o ${DOWNLOAD}/${JAVA_PKG}
+    else
+        echo "--- Download Server JRE 8u162 from MOS -----------------------------------------"
+        curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar cookie-jar.txt \
+        --location-trusted ${JAVA_URL} -o ${DOWNLOAD}/${JAVA_PKG}
+    fi
 else
     echo "--- Use local copy of ${DOWNLOAD}/${JAVA_PKG} --------------------------------------"
 fi

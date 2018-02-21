@@ -29,6 +29,7 @@ LABEL maintainer="stefan.oehrli@trivadis.com"
 # Arguments for MOS Download
 ARG MOS_USER
 ARG MOS_PASSWORD
+ARG LOCALHOST
 
 # Arguments for Oracle Installation
 ARG ORACLE_ROOT
@@ -62,14 +63,14 @@ COPY software ${DOWNLOAD}
 
 # Java and OUD base environment setup via shell script to reduce layers and 
 # optimize final disk usage
-RUN ${DOCKER_SCRIPTS}/setup_java.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD} && \
+RUN ${DOCKER_SCRIPTS}/setup_java.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD} LOCALHOST=${LOCALHOST} && \
     ${DOCKER_SCRIPTS}/setup_oudbase.sh
 
 # Switch to user oracle, oracle software as to be installed with regular user
 USER oracle
 
 # Instal OUD / OUDSM via shell script to reduce layers and optimize final disk usage
-RUN ${DOCKER_SCRIPTS}/setup_oud.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD}
+RUN ${DOCKER_SCRIPTS}/setup_oud.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PASSWORD} LOCALHOST=${LOCALHOST}
 
 # OUD admin and ldap ports as well the OUDSM console
 EXPOSE ${LDAP_PORT} ${LDAPS_PORT} ${ADMIN_PORT} ${REP_PORT}

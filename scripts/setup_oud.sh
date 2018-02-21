@@ -22,6 +22,7 @@
 # get the MOS Credentials
 MOS_USER="${1#*=}"
 MOS_PASSWORD="${2#*=}"
+LOCALHOST="${3#*=}"
 
 # Download and Package Variables
 # Oracle Unified Directory 12.2.1.3
@@ -45,18 +46,22 @@ elif [ ! -e ${DOCKER_SCRIPTS}/.netrc ]; then
 fi
 
 # set the response_file and inventory loc file
-export RESPONSE_FILE="${ORACLE_BASE}/local/etc/install.rsp"
-export INS_LOC_FILE="${ORACLE_BASE}/local/etc/oraInst.loc"
+export RESPONSE_FILE="${ORACLE_DATA}/etc/install.rsp"
+export INS_LOC_FILE="${ORACLE_DATA}/etc/oraInst.loc"
 
 # Download Oracle Unified Directory 12.2.1.3.0 if it doesn't exist /tmp/download
-if [ ! -e ${DOWNLOAD}/${FMW_OUD_PKG} ]
-then
-    echo "--- Download Oracle Unified Directory 12.2.1.3.0 from OTN ----------------------"
-    curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
-    --location-trusted ${FMW_OUD_URL} -o ${DOWNLOAD}/${FMW_OUD_PKG}
+if [ ! -e ${DOWNLOAD}/${FMW_OUD_PKG} ]; then
+    if [ ! "${LOCALHOST}" = "" ]; then
+        echo "--- Download Oracle Unified Directory from ${LOCALHOST} -----------------------------------------"
+        curl --location-trusted ${LOCALHOST}/${FMW_OUD_PKG} -o ${DOWNLOAD}/${FMW_OUD_PKG}
+    else
+        echo "--- Download Oracle Unified Directory 12.2.1.3.0 from OTN ----------------------"
+        curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
+        --location-trusted ${FMW_OUD_URL} -o ${DOWNLOAD}/${FMW_OUD_PKG}
+    fi
 else
     echo "--- Use local copy of ${DOWNLOAD}/${FMW_OUD_PKG} ----------------"
-fi  
+fi
 
 echo "--- Install Oracle Unified Directory 12.2.1.3.0 --------------------------------"
 cd ${DOWNLOAD}

@@ -19,34 +19,48 @@
 # ---------------------------------------------------------------------------
 
 # - Customization -----------------------------------------------------------
-export ADMIN_PORT=${ADMIN_PORT:-7001}       # Default admin port
-export ADMIN_SSLPORT=${ADMIN_SSLPORT:-7002} # Default SSL admin port
+export PORT=${PORT:-7001}       # Default admin port
+export PORT_SSL=${PORT_SSL:-7002} # Default SSL admin port
 export ADMIN_USER=${ADMIN_USER:-weblogic}   # Default directory admin user
 export ADMIN_PASSWORD=${ADMIN_PASSWORD:-""} # Default directory admin password
 
 # - End of Customization ----------------------------------------------------
 echo "--- Setup OUDSM environment on volume ${ORACLE_DATA} --------------------"
-# create instance and domain directories on volume
+
+# create instance directories on volume
 mkdir -v -p ${ORACLE_DATA}
-mkdir -v -p ${ORACLE_DATA}/backup
-mkdir -v -p ${ORACLE_DATA}/domains
-mkdir -v -p ${ORACLE_DATA}/etc
-mkdir -v -p ${ORACLE_DATA}/instances
-mkdir -v -p ${ORACLE_DATA}/log
+for i in admin backup etc instances domains log scripts; do
+    mkdir -v -p ${ORACLE_DATA}/${i}
+done
 
 # create oudtab file
 OUDTAB=${ORACLE_DATA}/etc/oudtab
-echo "# OUD Config File"                                > ${OUDTAB}
-echo "#  1 : OUD Instance Name"                         >>${OUDTAB}
-echo "#  2 : OUD LDAP Port"                             >>${OUDTAB}
-echo "#  3 : OUD LDAPS Port"                            >>${OUDTAB}
-echo "#  4 : OUD Admin Port"                            >>${OUDTAB}
-echo "#  5 : OUD Replication Port"                      >>${OUDTAB}
-echo "#---------------------------------------------"   >>${OUDTAB}
-echo "${DOMAIN_NAME}:${LDAP_PORT}:${LDAP_PORT}:${ADMIN_PORT}:${REP_PORT}" >>${OUDTAB}
+echo "# OUD Config File"                                        > ${OUDTAB}
+echo "#  1 : OUD Instance Name"                                 >>${OUDTAB}
+echo "#  2 : OUD LDAP Port"                                     >>${OUDTAB}
+echo "#  3 : OUD LDAPS Port"                                    >>${OUDTAB}
+echo "#  4 : OUD Admin Port"                                    >>${OUDTAB}
+echo "#  5 : OUD Replication Port"                              >>${OUDTAB}
+echo "#  6 : 6 : Directory type eg OUD, OID, ODSEE or OUDSM"    >>${OUDTAB}
+echo "#---------------------------------------------"           >>${OUDTAB}
+echo "${DOMAIN_NAME}:${PORT}:${PORT_SSL}:${PORT_ADMIN}:${PORT_REP}:OUDSM" >>${OUDTAB}
 
-# copy default config files
-cp ${ORACLE_BASE}/local/etc/*.conf ${ORACLE_DATA}/etc
+# Create default config file in ETC_BASE in case they are not yet available...
+for i in oud._DEFAULT_.conf oudenv_custom.conf oudenv.conf oudtab; do
+    if [ ! -f "${ORACLE_DATA}/etc/${i}" ]; then
+        cp ${ORACLE_BASE}/templates/etc/${i} ${ORACLE_DATA}/etc
+    fi
+done
+
+# create also some soft links from ETC_CORE to ETC_BASE
+for i in oudenv.conf oudtab; do
+    if [ ! -f "${ORACLE_DATA}/etc/${i}" ]; then
+        ln -sf ${ORACLE_DATA}/etc/${i} ${ORACLE_BASE}/etc/${i}
+    fi
+done
+
+# Load OUD environment for this instance
+. ${ORACLE_BASE}/local/bin/oudenv.sh ${DOMAIN_NAME} SILENT
 
 if [ -z ${ADMIN_PASSWORD} ]; then
     # Auto generate Oracle WebLogic Server admin password
@@ -74,8 +88,8 @@ sed -i -e "s|ADMIN_PASSWORD|$s|g" ${DOCKER_SCRIPTS}/create_OUDSM.py
 echo "--- Create WebLogic Server Domain (${DOMAIN_NAME}) -----------------------------"
 echo "  DOMAIN_NAME=${DOMAIN_NAME}"
 echo "  DOMAIN_HOME=${DOMAIN_HOME}"
-echo "  ADMIN_PORT=${ADMIN_PORT}"
-echo "  ADMIN_SSLPORT=${ADMIN_SSLPORT}"
+echo "  PORT=${PORT}"
+echo "  PORT_SSL=${PORT_SSL}"
 echo "  ADMIN_USER=${ADMIN_USER}"
 
 # Create an empty domain

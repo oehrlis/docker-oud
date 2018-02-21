@@ -25,7 +25,7 @@ export OUD_INSTANCE=${OUD_INSTANCE:-oud_docker}     # Default name for OUD insta
 export CREATE_INSTANCE=${CREATE_INSTANCE:-'TRUE'}   # Flag to create instance
 
 # OUD instance home directory
-export OUD_INSTANCE_HOME=${INSTANCE_BASE}/${OUD_INSTANCE}
+export OUD_INSTANCE_HOME=${OUD_INSTANCE_BASE}/${OUD_INSTANCE}
 # - End of Customization ----------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ function int_oud() {
     echo "---------------------------------------------------------------"
     echo "SIGINT received, shutting down OUD instance!"
     echo "---------------------------------------------------------------"
-    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds
+    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds >/dev/null 2>&1
 }
 
 # ---------------------------------------------------------------------------
@@ -45,7 +45,7 @@ function term_oud() {
     echo "---------------------------------------------------------------"
     echo "SIGTERM received, shutting down OUD instance!"
     echo "---------------------------------------------------------------"
-    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds
+    ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds >/dev/null 2>&1
 }
 
 # ---------------------------------------------------------------------------
@@ -78,7 +78,7 @@ if [ -f ${OUD_INSTANCE_HOME}/OUD/config/config.ldif ]; then
     echo "---------------------------------------------------------------"
     echo "   Start OUD instance (${OUD_INSTANCE}):"
     echo "---------------------------------------------------------------"
-    ${OUD_INSTANCE_HOME}/OUD/bin/start-ds
+    ${OUD_INSTANCE_HOME}/OUD/bin/start-ds >/dev/null 2>&1
 elif [ ${CREATE_INSTANCE} -eq 1 ]; then
     echo "---------------------------------------------------------------"
     echo "   Create OUD instance (${OUD_INSTANCE}):"
@@ -88,7 +88,7 @@ elif [ ${CREATE_INSTANCE} -eq 1 ]; then
     
     if [ $? -eq 0 ]; then
         # restart OUD instance
-        ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds --restart
+        ${OUD_INSTANCE_HOME}/OUD/bin/stop-ds --restart >/dev/null 2>&1
     fi
 else
     echo "---------------------------------------------------------------"
@@ -99,7 +99,7 @@ else
 fi
 
 # Check whether OUD instance is up and running
-${DOCKER_SCRIPTS}/check_OUD_Instance.sh >/dev/null
+${DOCKER_SCRIPTS}/check_OUD_Instance.sh >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "---------------------------------------------------------------"
     echo "   OUD instance is ready to use:"
@@ -107,10 +107,10 @@ if [ $? -eq 0 ]; then
     echo "   Instance Home (ok) : ${OUD_INSTANCE_HOME}"
     echo "   Oracle Home        : ${ORACLE_BASE}/product/${ORACLE_HOME_NAME}"
     echo "   Instance Status    : up"
-    echo "   LDAP Port          : ${LDAP_PORT}"
-    echo "   LDAPS Port         : ${LDAPS_PORT}"
-    echo "   Admin Port         : ${ADMIN_PORT}"
-    echo "   Replication Port   : ${REP_PORT}"
+    echo "   LDAP Port          : ${PORT}"
+    echo "   LDAPS Port         : ${PORT_SSL}"
+    echo "   Admin Port         : ${PORT_ADMIN}"
+    echo "   Replication Port   : ${PORT_REP}"
     echo "---------------------------------------------------------------"
 fi
 
