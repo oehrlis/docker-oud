@@ -49,7 +49,7 @@ echo "#  2 : OUD LDAP Port"                                     >>${OUDTAB}
 echo "#  3 : OUD LDAPS Port"                                    >>${OUDTAB}
 echo "#  4 : OUD Admin Port"                                    >>${OUDTAB}
 echo "#  5 : OUD Replication Port"                              >>${OUDTAB}
-echo "#  6 : 6 : Directory type eg OUD, OID, ODSEE or OUDSM"    >>${OUDTAB}
+echo "#  6 : Directory type eg OUD, OID, ODSEE or OUDSM"        >>${OUDTAB}
 echo "#---------------------------------------------"           >>${OUDTAB}
 echo "${OUD_INSTANCE}:${PORT}:${PORT_SSL}:${PORT_ADMIN}:${PORT_REP}:OUD" >>${OUDTAB}
 
@@ -109,7 +109,7 @@ fi
 
 echo "--- Create OUD instance --------------------------------------------------------"
 echo "  OUD_INSTANCE       = ${OUD_INSTANCE}"
-echo "  OUD_INSTANCE_BASE  = ${INSTANCE_BASE}"
+echo "  OUD_INSTANCE_BASE  = ${OUD_INSTANCE_BASE}"
 echo "  OUD_INSTANCE_ADMIN = ${OUD_INSTANCE_ADMIN}"
 echo "  OUD_INSTANCE_INIT  = ${OUD_INSTANCE_INIT}"
 echo "  OUD_INSTANCE_HOME  = ${INSTANCE_BASE}/${OUD_INSTANCE}"

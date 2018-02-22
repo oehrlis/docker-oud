@@ -74,8 +74,8 @@ RUN ${DOCKER_SCRIPTS}/setup_oudsm.sh MOS_USER=${MOS_USER} MOS_PASSWORD=${MOS_PAS
 EXPOSE ${PORT} ${PORT_SSL}
 
 # run container health check
-#HEALTHCHECK --interval=1m --start-period=5m \
-#   CMD "/opt/docker/bin/check_OUD_Instance.sh" >/dev/null || exit 1
+HEALTHCHECK --interval=1m --start-period=5m \
+   CMD "/opt/docker/bin/check_OUDSM_console.sh" >/dev/null || exit 1
 
 # Oracle data volume for OUD instance and configuration files
 VOLUME ["${ORACLE_DATA}"]
