@@ -35,6 +35,11 @@ export FMW_URL="https://updates.oracle.com/Orion/Services/download/p26269885_122
 export FMW_PKG=${FMW_URL#*patch_file=}
 export FMW_JAR=fmw_12.2.1.3.0_infrastructure.jar
 
+# Oracle WLS CPU Patch
+export WLS_URL="https://updates.oracle.com/Orion/Services/download/p27438258_122130_Generic.zip?aru=21899283&patch_file=p27438258_122130_Generic.zip"
+export WLS_PKG=${WLS_URL#*patch_file=}
+export WLS_PSU=$(echo $WLS_PKG|sed 's/p\([[:digit:]]*\).*/\1/')
+
 # create a .netrc if it does not exists
 if [[ ! -z "${MOS_USER}" ]]; then
     if [[ ! -z "${MOS_PASSWORD}" ]]; then
@@ -83,6 +88,29 @@ java -jar ${DOWNLOAD}/$FMW_JAR -silent \
     -ignoreSysPrereqs -force \
     -novalidation ORACLE_HOME=${ORACLE_BASE}/product/${ORACLE_HOME_NAME} \
     INSTALL_TYPE="WebLogic Server"
+
+# Weblogic 12.2.1.3.0 PSU if it doesn't exist /tmp/download
+if [ ! -e ${DOWNLOAD}/${WLS_PKG} ]; then
+    if [ ! "${LOCALHOST}" = "" ]; then
+        echo "--- Download Weblogic 12.2.1.3.0 PSU (${WLS_PSU}) from ${LOCALHOST}/${WLS_PKG} ---"
+        curl --location-trusted ${LOCALHOST}/${WLS_PKG} -o ${DOWNLOAD}/${WLS_PKG}
+    else
+        echo "--- Download Weblogic 12.2.1.3.0 PSU (${WLS_PSU}) from MOS --------------"
+        curl --netrc-file ${DOCKER_SCRIPTS}/.netrc --cookie-jar ${DOWNLOAD}/cookie-jar.txt \
+        --location-trusted $WLS_URL -o ${DOWNLOAD}/${WLS_PKG}
+    fi
+else
+    echo "--- Use local copy of ${DOWNLOAD}/${FMW_PKG} ----------------"
+fi
+
+echo "--- Install Weblogic 12.2.1.3.0 PSU (${WLS_PSU}) ------------------------"
+cd ${DOWNLOAD}
+echo "${DOWNLOAD}/${WLS_PKG}"
+unzip ${DOWNLOAD}/${WLS_PKG}
+cd ${WLS_PSU}
+
+# install PSU
+${ORACLE_BASE}/product/${ORACLE_HOME_NAME}/OPatch/opatch apply -silent
 
 # Download Oracle Unified Directory 12.2.1.3.0 if it doesn't exist /tmp/download
 if [ ! -e ${DOWNLOAD}/${FMW_OUD_PKG} ]; then
