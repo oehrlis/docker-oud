@@ -1,3 +1,5 @@
+This repository has been moved to [oehrlis/docker](https://github.com/oehrlis/docker).
+
 # Oracle Unified Directory on Docker
 Docker build files to facilitate installation, configuration, and environment setup for Docker DevOps users. For more information about Oracle Unified Directory please see the [Oracle Unified Directory 12.2.1.3.0 Online Documentation](https://docs.oracle.com/middleware/12213/oud/).
 
